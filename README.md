@@ -54,6 +54,40 @@ Or specify which part of the version to bump:
 uv version --bump <SEMVER_PART> # e.g. major, minor, patch
 ```
 
+## Tests
+
+Tests live in the `tests` directory.
+
+Install development dependencies first:
+
+```bash
+uv sync --group dev
+```
+
+Run all tests:
+
+```bash
+uv run pytest tests
+```
+
+Run only specific test:
+
+```bash
+uv run pytest tests/test_<some_file>.py
+```
+
+Show `print()` output during test execution:
+
+```bash
+uv run pytest tests -s
+```
+
+Show logs in the terminal:
+
+```bash
+uv run pytest tests -o log_cli=true --log-cli-level=INFO
+```
+
 ## Pre-commit
 
 This project uses pre-commit to ensure that the code is formatted correctly.
