@@ -17,6 +17,24 @@ from .base import (
 
 
 class OpenImagesDataset(BaseDetectionDataset):
+    """Open Images detection dataset reader for FiftyOne-style exported data.
+
+    Expected layout is ``<dataset_dirpath>/<split>/data`` for images,
+    ``<dataset_dirpath>/<split>/labels/detections.csv`` for annotations, and
+    ``<dataset_dirpath>/<split>/metadata/classes.csv`` for class metadata.
+    Open Images ``IsGroupOf`` annotations are treated as the dataset's crowd equivalent.
+
+    :param dataset_dirpath: Root directory of the downloaded Open Images dataset.
+    :param split: Dataset split to load.
+    :param transforms: Optional callable applied jointly to image and target by TorchVision.
+    :param transform: Optional image-only transform passed to ``VisionDataset``.
+    :param target_transform: Optional target-only transform passed to ``VisionDataset``.
+    :param classes_of_interest: Optional Open Images class names to keep.
+    :param include_crowd: Whether to keep Open Images ``IsGroupOf`` annotations.
+    :param drop_images_with_crowd: Whether to remove images that contain matching ``IsGroupOf`` annotations.
+    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
+    """
+
     def __init__(
         self,
         dataset_dirpath: str | Path,
@@ -70,6 +88,11 @@ class OpenImagesDataset(BaseDetectionDataset):
         self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
+        """Load an Open Images sample before TorchVision transforms are applied.
+
+        :param index: Dataset sample index.
+        :return: RGB image array and detection target.
+        """
         image_filepath = self.images_filepaths[index]
         image_id = image_filepath.stem
         image = np.asarray(Image.open(image_filepath).convert("RGB"))
@@ -112,6 +135,10 @@ class OpenImagesDataset(BaseDetectionDataset):
         return image, target
 
     def __len__(self) -> int:
+        """Return the number of images after configured image-level filtering.
+
+        :return: Dataset length.
+        """
         return len(self.images_filepaths)
 
     @staticmethod
@@ -121,6 +148,11 @@ class OpenImagesDataset(BaseDetectionDataset):
         return annotations[column].tolist()
 
     def _filter_annotations(self, annotations: pd.DataFrame) -> pd.DataFrame:
+        """Filter Open Images annotations by class and crowd policy.
+
+        :param annotations: Raw Open Images annotations for one image.
+        :return: Filtered annotations.
+        """
         annotations = annotations.copy()
         if self.source_id_filter is not None:
             annotations = annotations[annotations["LabelName"].isin(self.source_id_filter)]
@@ -129,6 +161,11 @@ class OpenImagesDataset(BaseDetectionDataset):
         return annotations
 
     def _filter_image_filepaths(self, image_filepaths: list[Path]) -> list[Path]:
+        """Filter image paths according to crowd and empty-image policy.
+
+        :param image_filepaths: Candidate image file paths.
+        :return: Filtered image file paths.
+        """
         if not self.drop_images_with_crowd and not self.remove_empty_images:
             return image_filepaths
 

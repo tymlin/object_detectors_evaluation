@@ -18,6 +18,22 @@ from .base import (
 
 
 class COCODataset(BaseDetectionDataset):
+    """COCO detection dataset reader for FiftyOne-style exported data.
+
+    Expected layout is ``<dataset_dirpath>/<split>/data`` for images and
+    ``<dataset_dirpath>/<split>/labels.json`` for COCO annotations.
+
+    :param dataset_dirpath: Root directory of the downloaded COCO dataset.
+    :param split: Dataset split to load.
+    :param transforms: Optional callable applied jointly to image and target by TorchVision.
+    :param transform: Optional image-only transform passed to ``VisionDataset``.
+    :param target_transform: Optional target-only transform passed to ``VisionDataset``.
+    :param classes_of_interest: Optional COCO class names to keep.
+    :param include_crowd: Whether to keep COCO ``iscrowd`` annotations.
+    :param drop_images_with_crowd: Whether to remove images that contain matching ``iscrowd`` annotations.
+    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
+    """
+
     def __init__(
         self,
         dataset_dirpath: str | Path,
@@ -69,6 +85,11 @@ class COCODataset(BaseDetectionDataset):
         self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
+        """Load a COCO sample before TorchVision transforms are applied.
+
+        :param index: Dataset sample index.
+        :return: RGB image array and detection target.
+        """
         image_filepath = self.images_filepaths[index]
         image_info = self.filename_to_image_info.get(image_filepath.name)
         if image_info is None:
@@ -125,6 +146,10 @@ class COCODataset(BaseDetectionDataset):
         return image, target
 
     def __len__(self) -> int:
+        """Return the number of images after configured image-level filtering.
+
+        :return: Dataset length.
+        """
         return len(self.images_filepaths)
 
     @staticmethod
@@ -135,6 +160,11 @@ class COCODataset(BaseDetectionDataset):
         return dict(annotations_by_image_id)
 
     def _filter_annotations(self, annotations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Filter COCO annotations by class and crowd policy.
+
+        :param annotations: Raw COCO annotations for one image.
+        :return: Filtered annotations.
+        """
         if self.source_id_filter is not None:
             annotations = [
                 annotation for annotation in annotations if annotation["category_id"] in self.source_id_filter
@@ -144,6 +174,11 @@ class COCODataset(BaseDetectionDataset):
         return annotations
 
     def _filter_image_filepaths(self, image_filepaths: list[Path]) -> list[Path]:
+        """Filter image paths according to crowd and empty-image policy.
+
+        :param image_filepaths: Candidate image file paths.
+        :return: Filtered image file paths.
+        """
         if not self.drop_images_with_crowd and not self.remove_empty_images:
             return image_filepaths
 

@@ -15,6 +15,11 @@ OPEN_IMAGES_V7_DATASET_NAME = "open-images-v7"
 
 
 def configure_fiftyone_dataset_dir(dataset_dirpath: str | Path) -> Path:
+    """Configure FiftyOne to use a local dataset directory.
+
+    :param dataset_dirpath: Directory where FiftyOne zoo datasets should be stored.
+    :return: Resolved dataset directory path.
+    """
     dataset_dirpath = Path(dataset_dirpath)
     dataset_dirpath.mkdir(parents=True, exist_ok=True)
     fo.config.dataset_zoo_dir = str(dataset_dirpath)
@@ -31,6 +36,16 @@ def download_coco_dataset(
     label_types: Sequence[str] = ("detections",),
     **kwargs: Any,
 ) -> Any:
+    """Download a COCO detection split through FiftyOne.
+
+    :param dataset_dirpath: Optional FiftyOne dataset storage directory.
+    :param split: COCO split to download.
+    :param classes: Optional COCO class names to download.
+    :param max_samples: Optional maximum number of samples.
+    :param label_types: FiftyOne label types to download.
+    :param kwargs: Additional arguments forwarded to FiftyOne.
+    :return: Result returned by ``fiftyone.zoo.download_zoo_dataset``.
+    """
     return download_zoo_detection_dataset(
         dataset_name=COCO_2017_DATASET_NAME,
         dataset_dirpath=dataset_dirpath,
@@ -50,6 +65,16 @@ def download_open_images_dataset(
     label_types: Sequence[str] = ("detections",),
     **kwargs: Any,
 ) -> Any:
+    """Download an Open Images detection split through FiftyOne.
+
+    :param dataset_dirpath: Optional FiftyOne dataset storage directory.
+    :param split: Open Images split to download.
+    :param classes: Optional Open Images class names to download.
+    :param max_samples: Optional maximum number of samples.
+    :param label_types: FiftyOne label types to download.
+    :param kwargs: Additional arguments forwarded to FiftyOne.
+    :return: Result returned by ``fiftyone.zoo.download_zoo_dataset``.
+    """
     return download_zoo_detection_dataset(
         dataset_name=OPEN_IMAGES_V7_DATASET_NAME,
         dataset_dirpath=dataset_dirpath,
@@ -70,6 +95,17 @@ def download_zoo_detection_dataset(
     label_types: Sequence[str] = ("detections",),
     **kwargs: Any,
 ) -> Any:
+    """Download a detection dataset from the FiftyOne dataset zoo.
+
+    :param dataset_name: FiftyOne zoo dataset name.
+    :param dataset_dirpath: Optional FiftyOne dataset storage directory.
+    :param split: Dataset split to download.
+    :param classes: Optional class names to download.
+    :param max_samples: Optional maximum number of samples.
+    :param label_types: FiftyOne label types to download.
+    :param kwargs: Additional arguments forwarded to FiftyOne.
+    :return: Result returned by ``fiftyone.zoo.download_zoo_dataset``.
+    """
     if dataset_dirpath is not None:
         configure_fiftyone_dataset_dir(dataset_dirpath)
 

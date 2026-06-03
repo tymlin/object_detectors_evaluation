@@ -22,12 +22,23 @@ DetectionTarget = dict[str, Any]
 
 
 def detection_collate_fn(batch: list[tuple[Any, DetectionTarget]]) -> tuple[list[Any], list[DetectionTarget]]:
+    """Collate detection samples into image and target lists.
+
+    :param batch: Sequence of ``(image, target)`` samples returned by a detection dataset.
+    :return: Pair of image list and target list suitable for variable-size detection targets.
+    """
     images, targets = zip(*batch)
     return list(images), list(targets)
 
 
 @dataclass(frozen=True, slots=True)
 class DetectionClassMap:
+    """Map dataset-native class identifiers to contiguous detection labels.
+
+    :param source_ids: Class identifiers from the source dataset, such as COCO category ids or Open Images MIDs.
+    :param names: Human-readable class names aligned with ``source_ids``.
+    """
+
     source_ids: tuple[Hashable, ...]
     names: tuple[str, ...]
 
@@ -86,6 +97,19 @@ class DetectionClassMap:
 
 
 class BaseDetectionDataset(VisionDataset):
+    """Base class for object detection datasets backed by local image and annotation files.
+
+    :param dataset_dirpath: Root directory of the downloaded dataset.
+    :param split: Dataset split to load.
+    :param transforms: Optional callable applied jointly to image and target by TorchVision.
+    :param transform: Optional image-only transform passed to ``VisionDataset``.
+    :param target_transform: Optional target-only transform passed to ``VisionDataset``.
+    :param classes_of_interest: Optional class names to keep.
+    :param include_crowd: Whether to keep crowd or group-of annotations in returned targets.
+    :param drop_images_with_crowd: Whether to remove images that contain crowd or group-of annotations.
+    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
+    """
+
     collate_fn: Callable | None = staticmethod(detection_collate_fn)
 
     def __init__(
@@ -116,6 +140,10 @@ class BaseDetectionDataset(VisionDataset):
         self.class_map: DetectionClassMap | None = None
 
     def set_class_map(self, class_map: DetectionClassMap) -> None:
+        """Set class metadata and derived lookup dictionaries.
+
+        :param class_map: Class mapping for the concrete dataset.
+        """
         self.class_map = class_map
         self.classes_names = list(class_map.names)
         self.classes_ids = list(class_map.labels)
@@ -129,23 +157,45 @@ class BaseDetectionDataset(VisionDataset):
         self.classes_int2color = dict(zip(self.classes_ids, self.class_colors))
 
     def get_class_names(self) -> list[str]:
+        """Return human-readable class names.
+
+        :return: Class names in internal label order.
+        """
         self._require_class_map()
         return list(self.class_map.names)
 
     def get_class_ids(self) -> list[int]:
+        """Return contiguous internal class ids.
+
+        :return: Internal class ids in label order.
+        """
         self._require_class_map()
         return list(self.class_map.labels)
 
     def get_source_class_ids(self) -> list[Hashable]:
+        """Return dataset-native class ids.
+
+        :return: Source class identifiers aligned with internal labels.
+        """
         self._require_class_map()
         return list(self.class_map.source_ids)
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
+        """Load a raw image and target without TorchVision tensor wrapping.
+
+        :param index: Dataset sample index.
+        :return: RGB image array and target dictionary.
+        """
         msg = "Subclasses must implement `get_raw_sample`"
         logger.error(msg)
         raise NotImplementedError(msg)
 
     def __getitem__(self, index: int) -> tuple[Tensor | Image.Image, DetectionTarget]:
+        """Load a sample and apply configured TorchVision transforms.
+
+        :param index: Dataset sample index.
+        :return: Transformed image and target.
+        """
         image, target = self.get_raw_sample(index)
         image = Image.fromarray(image)
         target = self._to_torch_target(target)
