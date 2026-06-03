@@ -6,12 +6,12 @@ from typing import Any, Sequence
 import fiftyone as fo
 import fiftyone.zoo as foz
 
-from object_detectors_evaluation.consts import DATASETS_DIRPATH
+from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
+from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.utils.types import Split
 
 COCO_2017_DATASET_NAME = "coco-2017"
 OPEN_IMAGES_V7_DATASET_NAME = "open-images-v7"
-FIFTYONE_DATASETS_DIRPATH = DATASETS_DIRPATH / "fiftyone"
 
 
 def configure_fiftyone_dataset_dir(dataset_dirpath: str | Path) -> Path:
@@ -19,6 +19,7 @@ def configure_fiftyone_dataset_dir(dataset_dirpath: str | Path) -> Path:
     dataset_dirpath.mkdir(parents=True, exist_ok=True)
     fo.config.dataset_zoo_dir = str(dataset_dirpath)
     fo.config.default_dataset_dir = str(dataset_dirpath)
+    logger.info(f"Configured FiftyOne dataset directory at path: '{dataset_dirpath}'")
     return dataset_dirpath
 
 
@@ -72,7 +73,8 @@ def download_zoo_detection_dataset(
     if dataset_dirpath is not None:
         configure_fiftyone_dataset_dir(dataset_dirpath)
 
-    return foz.download_zoo_dataset(
+    logger.info(f"Downloading FiftyOne dataset `{dataset_name}` split `{split}`")
+    dataset = foz.download_zoo_dataset(
         dataset_name,
         split=split,
         label_types=list(label_types),
@@ -80,3 +82,5 @@ def download_zoo_detection_dataset(
         max_samples=max_samples,
         **kwargs,
     )
+    logger.info(f"Downloaded FiftyOne dataset `{dataset_name}` split `{split}`")
+    return dataset
