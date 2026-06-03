@@ -5,9 +5,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Hashable
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torchvision.tv_tensors
+from distinctipy import distinctipy
 from natsort import natsorted
 from PIL import Image
 from torch import Tensor
@@ -117,6 +119,8 @@ class BaseDetectionDataset(VisionDataset):
         self.classes_source_id2int = dict(class_map.source_id_to_label)
         self.classes_int2source_id = dict(class_map.label_to_source_id)
         self.num_classes = len(class_map.names)
+        self.class_colors = distinctipy.get_colors(self.num_classes, rng=42)
+        self.classes_int2color = dict(zip(self.classes_ids, self.class_colors))
 
     def get_class_names(self) -> list[str]:
         self._require_class_map()
@@ -145,6 +149,54 @@ class BaseDetectionDataset(VisionDataset):
 
         return image, target
 
+    def plot_images_bbox(self, idxs: list[int], after_transforms: bool = False) -> plt.Figure:
+        """Visualize images with bounding boxes and class labels.
+
+        :param idxs: Dataset sample indexes to plot.
+        :param after_transforms: Whether to plot samples after applying dataset transforms.
+        :return: Matplotlib figure containing the plotted samples.
+        """
+        n_images = len(idxs)
+        fig, axes = plt.subplots(1, n_images, figsize=(5 * n_images, 5))
+        if n_images == 1:
+            axes = [axes]
+
+        for axis, idx in zip(axes, idxs):
+            if after_transforms:
+                image, target = self[idx]
+                image_array = self._image_to_numpy(image)
+                boxes = target["boxes"].cpu().numpy()
+                labels = target["labels"].cpu().numpy()
+            else:
+                image_array, target = self.get_raw_sample(idx)
+                boxes = target["boxes"]
+                labels = target["labels"]
+
+            height, width = image_array.shape[:2]
+            image_id = target["image_id"]
+            axis.imshow(image_array)
+            axis.set_title(f"Image ID: {image_id}\nH: {height}, W: {width}, Num of objects: {len(boxes)}")
+            axis.axis("off")
+
+            for box, label in zip(boxes, labels):
+                label_int = int(label)
+                x1, y1, x2, y2 = box
+                color = self.classes_int2color[label_int]
+                rect = plt.Rectangle(
+                    (x1, y1),
+                    x2 - x1,
+                    y2 - y1,
+                    fill=False,
+                    edgecolor=color,
+                    linewidth=2,
+                )
+                axis.add_patch(rect)
+                class_name = self.classes_int2str.get(label_int, f"Class {label_int}")
+                axis.text(x1, y1 - 5, class_name, color="white", bbox={"facecolor": color, "alpha": 0.7})
+
+        plt.tight_layout(rect=[0, 0, 1, 0.98])
+        return fig
+
     def _to_torch_target(self, target: DetectionTarget) -> DetectionTarget:
         target = dict(target)
         target["boxes"] = torchvision.tv_tensors.BoundingBoxes(
@@ -154,6 +206,15 @@ class BaseDetectionDataset(VisionDataset):
         )
         target["labels"] = torch.as_tensor(target["labels"], dtype=torch.int64)
         return target
+
+    @staticmethod
+    def _image_to_numpy(image: Tensor | Image.Image | np.ndarray) -> np.ndarray:
+        if isinstance(image, Tensor):
+            image = image.detach().cpu()
+            if image.ndim == 3 and image.shape[0] in {1, 3}:
+                image = image.permute(1, 2, 0)
+            return image.numpy()
+        return np.asarray(image)
 
     def _require_class_map(self) -> None:
         if self.class_map is None:

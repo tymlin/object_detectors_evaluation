@@ -1,0 +1,55 @@
+import random
+
+import matplotlib.pyplot as plt
+import torch
+from torchvision.transforms import v2
+
+from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
+from object_detectors_evaluation.datasets import OpenImagesDataset
+from object_detectors_evaluation.loggers import logger
+from object_detectors_evaluation.utils.types import Split
+
+DATASET_DIRPATH = FIFTYONE_DATASETS_DIRPATH / "open-images-v7"
+SPLIT: Split = "test"
+CLASSES_OF_INTEREST = ["Person"]
+
+NUM_SAMPLES = 5
+RANDOM_SAMPLES = False
+APPLY_TRANSFORMS = False
+RANDOM_SEED = 42
+
+transforms = (
+    v2.Compose(
+        [
+            v2.RandomResizedCrop(size=(800, 800), antialias=True),
+            v2.RandomHorizontalFlip(p=0.5),
+            v2.PILToTensor(),
+            v2.ToDtype(torch.float32, scale=True),
+            v2.SanitizeBoundingBoxes(),
+            # v2.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ]
+    )
+    if APPLY_TRANSFORMS
+    else None
+)
+
+logger.info(f"Creating dataset `Open Images` (split: {SPLIT}) from path: '{DATASET_DIRPATH}'")
+dataset = OpenImagesDataset(
+    dataset_dirpath=DATASET_DIRPATH,
+    split=SPLIT,
+    classes_of_interest=CLASSES_OF_INTEREST,
+    transforms=transforms,
+)
+logger.info(f"Dataset `Open Images` created with {len(dataset)} samples")
+
+num_samples = min(NUM_SAMPLES, len(dataset))
+if RANDOM_SAMPLES:
+    random.seed(RANDOM_SEED)
+    idxs = random.sample(range(len(dataset)), num_samples)
+else:
+    idxs = list(range(num_samples))
+
+logger.info(f"Plotting dataset `Open Images` indexes: {idxs}")
+fig = dataset.plot_images_bbox(idxs, after_transforms=APPLY_TRANSFORMS)
+fig.show()
+plt.close("all")
