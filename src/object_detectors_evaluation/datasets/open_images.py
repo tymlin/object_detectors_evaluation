@@ -25,6 +25,9 @@ class OpenImagesDataset(BaseDetectionDataset):
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         classes_of_interest: list[str] | None = None,
+        include_crowd: bool = True,
+        drop_images_with_crowd: bool = False,
+        remove_empty_images: bool = False,
     ) -> None:
         super().__init__(
             dataset_dirpath=dataset_dirpath,
@@ -33,6 +36,9 @@ class OpenImagesDataset(BaseDetectionDataset):
             transform=transform,
             target_transform=target_transform,
             classes_of_interest=classes_of_interest,
+            include_crowd=include_crowd,
+            drop_images_with_crowd=drop_images_with_crowd,
+            remove_empty_images=remove_empty_images,
         )
 
         self.images_dirpath = self.dataset_dirpath / split / "data"
@@ -61,6 +67,7 @@ class OpenImagesDataset(BaseDetectionDataset):
         self.annotations_by_image_id = {
             image_id: rows.copy() for image_id, rows in self.annotations.groupby("ImageID", sort=False)
         }
+        self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
         image_filepath = self.images_filepaths[index]
@@ -69,9 +76,7 @@ class OpenImagesDataset(BaseDetectionDataset):
         image_height, image_width = image.shape[:2]
         image_size = (image_height, image_width)
 
-        annotations = self.annotations_by_image_id.get(image_id, self.annotations.iloc[0:0]).copy()
-        if self.source_id_filter is not None:
-            annotations = annotations[annotations["LabelName"].isin(self.source_id_filter)]
+        annotations = self._filter_annotations(self.annotations_by_image_id.get(image_id, self.annotations.iloc[0:0]))
 
         labels_source_ids = annotations["LabelName"].tolist()
         labels_names = [self.class_map.name_for_source_id(source_id) for source_id in labels_source_ids]
@@ -114,3 +119,29 @@ class OpenImagesDataset(BaseDetectionDataset):
         if column not in annotations.columns:
             return []
         return annotations[column].tolist()
+
+    def _filter_annotations(self, annotations: pd.DataFrame) -> pd.DataFrame:
+        annotations = annotations.copy()
+        if self.source_id_filter is not None:
+            annotations = annotations[annotations["LabelName"].isin(self.source_id_filter)]
+        if not self.include_crowd and "IsGroupOf" in annotations.columns:
+            annotations = annotations[annotations["IsGroupOf"] == 0]
+        return annotations
+
+    def _filter_image_filepaths(self, image_filepaths: list[Path]) -> list[Path]:
+        if not self.drop_images_with_crowd and not self.remove_empty_images:
+            return image_filepaths
+
+        filtered_image_filepaths = []
+        for image_filepath in image_filepaths:
+            annotations = self.annotations_by_image_id.get(image_filepath.stem, self.annotations.iloc[0:0]).copy()
+            if self.source_id_filter is not None:
+                annotations = annotations[annotations["LabelName"].isin(self.source_id_filter)]
+            has_crowd = "IsGroupOf" in annotations.columns and bool((annotations["IsGroupOf"] == 1).any())
+            if self.drop_images_with_crowd and has_crowd:
+                continue
+            if self.remove_empty_images and len(self._filter_annotations(annotations)) == 0:
+                continue
+            filtered_image_filepaths.append(image_filepath)
+
+        return filtered_image_filepaths

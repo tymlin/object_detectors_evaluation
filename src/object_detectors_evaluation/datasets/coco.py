@@ -26,6 +26,9 @@ class COCODataset(BaseDetectionDataset):
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         classes_of_interest: list[str] | None = None,
+        include_crowd: bool = True,
+        drop_images_with_crowd: bool = False,
+        remove_empty_images: bool = False,
     ) -> None:
         super().__init__(
             dataset_dirpath=dataset_dirpath,
@@ -34,6 +37,9 @@ class COCODataset(BaseDetectionDataset):
             transform=transform,
             target_transform=target_transform,
             classes_of_interest=classes_of_interest,
+            include_crowd=include_crowd,
+            drop_images_with_crowd=drop_images_with_crowd,
+            remove_empty_images=remove_empty_images,
         )
 
         self.images_dirpath = self.dataset_dirpath / split / "data"
@@ -60,6 +66,7 @@ class COCODataset(BaseDetectionDataset):
         self.filename_to_image_info = {image_info["file_name"]: image_info for image_info in self.images_info}
         self.image_id_to_annotations = self._annotations_by_image_id(self.annotations_data)
         self.source_id_filter = self._source_id_filter()
+        self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
         image_filepath = self.images_filepaths[index]
@@ -75,11 +82,7 @@ class COCODataset(BaseDetectionDataset):
         image_width = int(image_info.get("width", image.shape[1]))
         image_size = (image_height, image_width)
 
-        annotations = self.image_id_to_annotations.get(image_id, [])
-        if self.source_id_filter is not None:
-            annotations = [
-                annotation for annotation in annotations if annotation["category_id"] in self.source_id_filter
-            ]
+        annotations = self._filter_annotations(self.image_id_to_annotations.get(image_id, []))
 
         boxes: list[list[float]] = []
         boxes_source: list[list[float]] = []
@@ -130,3 +133,40 @@ class COCODataset(BaseDetectionDataset):
         for annotation in annotations:
             annotations_by_image_id[annotation["image_id"]].append(annotation)
         return dict(annotations_by_image_id)
+
+    def _filter_annotations(self, annotations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if self.source_id_filter is not None:
+            annotations = [
+                annotation for annotation in annotations if annotation["category_id"] in self.source_id_filter
+            ]
+        if not self.include_crowd:
+            annotations = [annotation for annotation in annotations if not self._is_crowd_annotation(annotation)]
+        return annotations
+
+    def _filter_image_filepaths(self, image_filepaths: list[Path]) -> list[Path]:
+        if not self.drop_images_with_crowd and not self.remove_empty_images:
+            return image_filepaths
+
+        filtered_image_filepaths = []
+        for image_filepath in image_filepaths:
+            image_info = self.filename_to_image_info.get(image_filepath.name)
+            if image_info is None:
+                continue
+
+            annotations = self.image_id_to_annotations.get(image_info["id"], [])
+            if self.source_id_filter is not None:
+                annotations = [
+                    annotation for annotation in annotations if annotation["category_id"] in self.source_id_filter
+                ]
+            has_crowd = any(self._is_crowd_annotation(annotation) for annotation in annotations)
+            if self.drop_images_with_crowd and has_crowd:
+                continue
+            if self.remove_empty_images and len(self._filter_annotations(annotations)) == 0:
+                continue
+            filtered_image_filepaths.append(image_filepath)
+
+        return filtered_image_filepaths
+
+    @staticmethod
+    def _is_crowd_annotation(annotation: dict[str, Any]) -> bool:
+        return bool(annotation.get("iscrowd", 0))

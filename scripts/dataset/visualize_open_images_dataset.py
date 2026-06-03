@@ -17,6 +17,9 @@ NUM_SAMPLES = 5
 RANDOM_SAMPLES = False
 APPLY_TRANSFORMS = False
 RANDOM_SEED = 42
+INCLUDE_CROWD = True
+DROP_IMAGES_WITH_CROWD = False
+REMOVE_EMPTY_IMAGES = False
 
 transforms = (
     v2.Compose(
@@ -38,6 +41,9 @@ dataset = OpenImagesDataset(
     dataset_dirpath=DATASET_DIRPATH,
     split=SPLIT,
     classes_of_interest=CLASSES_OF_INTEREST,
+    include_crowd=INCLUDE_CROWD,
+    drop_images_with_crowd=DROP_IMAGES_WITH_CROWD,
+    remove_empty_images=REMOVE_EMPTY_IMAGES,
     transforms=transforms,
 )
 logger.info(f"Dataset `Open Images` created with {len(dataset)} samples")

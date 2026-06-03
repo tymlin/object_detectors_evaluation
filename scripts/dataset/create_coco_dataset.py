@@ -6,6 +6,9 @@ from object_detectors_evaluation.utils.types import Split
 DATASET_DIRPATH = FIFTYONE_DATASETS_DIRPATH / "coco-2017"
 SPLIT: Split = "validation"
 CLASSES_OF_INTEREST = ["person"]
+INCLUDE_CROWD = True
+DROP_IMAGES_WITH_CROWD = False
+REMOVE_EMPTY_IMAGES = False
 INDEX = 0
 
 
@@ -14,6 +17,9 @@ dataset = COCODataset(
     dataset_dirpath=DATASET_DIRPATH,
     split=SPLIT,
     classes_of_interest=CLASSES_OF_INTEREST,
+    include_crowd=INCLUDE_CROWD,
+    drop_images_with_crowd=DROP_IMAGES_WITH_CROWD,
+    remove_empty_images=REMOVE_EMPTY_IMAGES,
 )
 logger.info(f"Dataset `COCO` created with {len(dataset)} samples")
 logger.info(f"Dataset `COCO` classes ({len(dataset.get_class_names())}): {dataset.get_class_names()}")

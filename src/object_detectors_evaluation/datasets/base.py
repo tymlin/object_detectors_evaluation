@@ -96,6 +96,9 @@ class BaseDetectionDataset(VisionDataset):
         transform: Callable | None = None,
         target_transform: Callable | None = None,
         classes_of_interest: list[str] | None = None,
+        include_crowd: bool = True,
+        drop_images_with_crowd: bool = False,
+        remove_empty_images: bool = False,
     ) -> None:
         self.dataset_dirpath = Path(dataset_dirpath)
         super().__init__(
@@ -107,6 +110,9 @@ class BaseDetectionDataset(VisionDataset):
         self.split = split
         self.name = f"{self.dataset_dirpath.name}-{split}"
         self.classes_of_interest = classes_of_interest
+        self.include_crowd = include_crowd
+        self.drop_images_with_crowd = drop_images_with_crowd
+        self.remove_empty_images = remove_empty_images
         self.class_map: DetectionClassMap | None = None
 
     def set_class_map(self, class_map: DetectionClassMap) -> None:
