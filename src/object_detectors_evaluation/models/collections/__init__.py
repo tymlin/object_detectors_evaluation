@@ -1,0 +1,49 @@
+from object_detectors_evaluation.models.collections.dfine import (
+    DFINE_COLLECTION_URL,
+    DFINE_MODEL_NAMES,
+    DFINE_MODEL_URLS,
+    DFINE_MODELS,
+    DFINE_REPO_IDS,
+)
+from object_detectors_evaluation.models.collections.rfdetr import (
+    RFDETR_MODEL_NAMES,
+    RFDETR_MODEL_URLS,
+    RFDETR_MODELS,
+    RFDETR_MODELS_PAGE_URL,
+    RFDETR_REPO_IDS,
+)
+from object_detectors_evaluation.models.collections.rtdetr import (
+    RTDETR_MODEL_NAMES,
+    RTDETR_MODEL_URLS,
+    RTDETR_MODELS,
+    RTDETR_MODELS_PAGE_URL,
+    RTDETR_REPO_IDS,
+)
+from object_detectors_evaluation.models.collections.ultralytics_yolo import (
+    ULTRALYTICS_YOLO_DETECTION_FILENAMES,
+    ULTRALYTICS_YOLO_DETECTION_MODELS,
+    ULTRALYTICS_YOLO_DETECTION_NAMES,
+    ULTRALYTICS_YOLO_DETECTION_URLS,
+)
+
+__all__ = [
+    "DFINE_COLLECTION_URL",
+    "DFINE_MODELS",
+    "DFINE_MODEL_NAMES",
+    "DFINE_MODEL_URLS",
+    "DFINE_REPO_IDS",
+    "RFDETR_MODELS",
+    "RFDETR_MODELS_PAGE_URL",
+    "RFDETR_MODEL_NAMES",
+    "RFDETR_MODEL_URLS",
+    "RFDETR_REPO_IDS",
+    "RTDETR_MODELS",
+    "RTDETR_MODELS_PAGE_URL",
+    "RTDETR_MODEL_NAMES",
+    "RTDETR_MODEL_URLS",
+    "RTDETR_REPO_IDS",
+    "ULTRALYTICS_YOLO_DETECTION_FILENAMES",
+    "ULTRALYTICS_YOLO_DETECTION_MODELS",
+    "ULTRALYTICS_YOLO_DETECTION_NAMES",
+    "ULTRALYTICS_YOLO_DETECTION_URLS",
+]

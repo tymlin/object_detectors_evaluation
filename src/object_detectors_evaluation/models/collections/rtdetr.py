@@ -1,0 +1,117 @@
+"""Structured Hugging Face metadata scraped from the PekingU models page.
+
+Source page:
+https://huggingface.co/PekingU/models
+"""
+
+from object_detectors_evaluation.models import ModelSpec
+
+RTDETR_MODELS_PAGE_URL = "https://huggingface.co/PekingU/models"
+
+_BASE_URL = "https://huggingface.co"
+
+RTDETR_MODELS: tuple[ModelSpec, ...] = (
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_v2_r101vd",
+        repo_id="PekingU/rtdetr_v2_r101vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_v2_r101vd",
+        family="RT-DETR",
+        training_track="v2",
+        note="RT-DETR v2 model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_v2_r50vd",
+        repo_id="PekingU/rtdetr_v2_r50vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_v2_r50vd",
+        family="RT-DETR",
+        training_track="v2",
+        note="RT-DETR v2 model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_v2_r34vd",
+        repo_id="PekingU/rtdetr_v2_r34vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_v2_r34vd",
+        family="RT-DETR",
+        training_track="v2",
+        note="RT-DETR v2 model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_v2_r18vd",
+        repo_id="PekingU/rtdetr_v2_r18vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_v2_r18vd",
+        family="RT-DETR",
+        training_track="v2",
+        note="RT-DETR v2 model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r50vd",
+        repo_id="PekingU/rtdetr_r50vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r50vd",
+        family="RT-DETR",
+        training_track="base",
+        note="RT-DETR base model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r18vd",
+        repo_id="PekingU/rtdetr_r18vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r18vd",
+        family="RT-DETR",
+        training_track="base",
+        note="RT-DETR base model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r34vd",
+        repo_id="PekingU/rtdetr_r34vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r34vd",
+        family="RT-DETR",
+        training_track="base",
+        note="RT-DETR base model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r101vd",
+        repo_id="PekingU/rtdetr_r101vd",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r101vd",
+        family="RT-DETR",
+        training_track="base",
+        note="RT-DETR base model from the PekingU organization page.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r18vd_coco_o365",
+        repo_id="PekingU/rtdetr_r18vd_coco_o365",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r18vd_coco_o365",
+        family="RT-DETR",
+        training_track="coco_o365",
+        note="RT-DETR model trained with COCO and Objects365.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r50vd_coco_o365",
+        repo_id="PekingU/rtdetr_r50vd_coco_o365",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r50vd_coco_o365",
+        family="RT-DETR",
+        training_track="coco_o365",
+        note="RT-DETR model trained with COCO and Objects365.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="rtdetr_r101vd_coco_o365",
+        repo_id="PekingU/rtdetr_r101vd_coco_o365",
+        model_url=f"{_BASE_URL}/PekingU/rtdetr_r101vd_coco_o365",
+        family="RT-DETR",
+        training_track="coco_o365",
+        note="RT-DETR model trained with COCO and Objects365.",
+    ),
+)
+
+RTDETR_MODEL_NAMES: tuple[str, ...] = tuple(model.name for model in RTDETR_MODELS)
+RTDETR_REPO_IDS: tuple[str, ...] = tuple(model.repo_id for model in RTDETR_MODELS)
+RTDETR_MODEL_URLS: tuple[str, ...] = tuple(model.model_url for model in RTDETR_MODELS)

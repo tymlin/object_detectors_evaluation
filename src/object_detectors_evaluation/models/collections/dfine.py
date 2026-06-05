@@ -1,0 +1,135 @@
+"""Structured Hugging Face metadata scraped from the ustc-community D-FINE collection.
+
+Source collection:
+https://huggingface.co/collections/ustc-community/d-fine
+"""
+
+from object_detectors_evaluation.models import ModelSpec
+
+DFINE_COLLECTION_URL = "https://huggingface.co/collections/ustc-community/d-fine"
+
+_BASE_URL = "https://huggingface.co"
+
+DFINE_MODELS: tuple[ModelSpec, ...] = (
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-nano-coco",
+        repo_id="ustc-community/dfine-nano-coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-nano-coco",
+        family="D-FINE",
+        training_track="coco",
+        note="Trained on COCO dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-small-coco",
+        repo_id="ustc-community/dfine-small-coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-small-coco",
+        family="D-FINE",
+        training_track="coco",
+        note="Trained on COCO dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-medium-coco",
+        repo_id="ustc-community/dfine-medium-coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-medium-coco",
+        family="D-FINE",
+        training_track="coco",
+        note="Trained on COCO dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-large-coco",
+        repo_id="ustc-community/dfine-large-coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-large-coco",
+        family="D-FINE",
+        training_track="coco",
+        note="Trained on COCO dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-xlarge-coco",
+        repo_id="ustc-community/dfine-xlarge-coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-xlarge-coco",
+        family="D-FINE",
+        training_track="coco",
+        note="Trained on COCO dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-small-obj365",
+        repo_id="ustc-community/dfine-small-obj365",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-small-obj365",
+        family="D-FINE",
+        training_track="obj365",
+        note="Trained on Object365 dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-medium-obj365",
+        repo_id="ustc-community/dfine-medium-obj365",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-medium-obj365",
+        family="D-FINE",
+        training_track="obj365",
+        note="Trained on Object365 dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-large-obj365",
+        repo_id="ustc-community/dfine-large-obj365",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-large-obj365",
+        family="D-FINE",
+        training_track="obj365",
+        note="Trained on Object365 dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-xlarge-obj365",
+        repo_id="ustc-community/dfine-xlarge-obj365",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-xlarge-obj365",
+        family="D-FINE",
+        training_track="obj365",
+        note="Trained on Object365 dataset.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-small-obj2coco",
+        repo_id="ustc-community/dfine-small-obj2coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-small-obj2coco",
+        family="D-FINE",
+        training_track="obj2coco",
+        note="Pretrained on Object365, then trained on COCO.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-medium-obj2coco",
+        repo_id="ustc-community/dfine-medium-obj2coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-medium-obj2coco",
+        family="D-FINE",
+        training_track="obj2coco",
+        note="Pretrained on Object365, then trained on COCO.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-large-obj2coco-e25",
+        repo_id="ustc-community/dfine-large-obj2coco-e25",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-large-obj2coco-e25",
+        family="D-FINE",
+        training_track="obj2coco",
+        note="Pretrained on Object365, then trained on COCO.",
+    ),
+    ModelSpec(
+        source_type="huggingface",
+        name="dfine-xlarge-obj2coco",
+        repo_id="ustc-community/dfine-xlarge-obj2coco",
+        model_url=f"{_BASE_URL}/ustc-community/dfine-xlarge-obj2coco",
+        family="D-FINE",
+        training_track="obj2coco",
+        note="Pretrained on Object365, then trained on COCO.",
+    ),
+)
+
+DFINE_MODEL_NAMES: tuple[str, ...] = tuple(model.name for model in DFINE_MODELS)
+DFINE_REPO_IDS: tuple[str, ...] = tuple(model.repo_id for model in DFINE_MODELS)
+DFINE_MODEL_URLS: tuple[str, ...] = tuple(model.model_url for model in DFINE_MODELS)
