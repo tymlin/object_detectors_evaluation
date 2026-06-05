@@ -40,6 +40,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5nu.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -51,6 +54,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5su.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -62,6 +68,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5mu.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -73,6 +82,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5lu.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -84,6 +96,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5xu.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -95,6 +110,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5n6u.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -106,6 +124,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5s6u.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -117,6 +138,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5m6u.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -128,6 +152,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5l6u.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -139,6 +166,9 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov5x6u.pt"),
         docs_url=YOLOV5U_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
 )
@@ -153,6 +183,9 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov8n.pt"),
         docs_url=YOLOV8_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -164,6 +197,9 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov8s.pt"),
         docs_url=YOLOV8_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -175,6 +211,9 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov8m.pt"),
         docs_url=YOLOV8_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -186,6 +225,9 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov8l.pt"),
         docs_url=YOLOV8_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -197,6 +239,9 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov8x.pt"),
         docs_url=YOLOV8_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
 )
@@ -211,6 +256,9 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov9t.pt"),
         docs_url=YOLOV9_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -222,6 +270,9 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov9s.pt"),
         docs_url=YOLOV9_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -233,6 +284,9 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov9m.pt"),
         docs_url=YOLOV9_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -244,6 +298,9 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov9c.pt"),
         docs_url=YOLOV9_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -255,6 +312,9 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov9e.pt"),
         docs_url=YOLOV9_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
 )
@@ -269,6 +329,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10n.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -280,6 +343,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10s.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -291,6 +357,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10m.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -302,6 +371,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10b.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -313,6 +385,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10l.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -324,6 +399,9 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolov10x.pt"),
         docs_url=YOLOV10_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
 )
@@ -338,6 +416,9 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo11n.pt"),
         docs_url=YOLO11_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -349,6 +430,9 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo11s.pt"),
         docs_url=YOLO11_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -360,6 +444,9 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo11m.pt"),
         docs_url=YOLO11_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -371,6 +458,9 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo11l.pt"),
         docs_url=YOLO11_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -382,6 +472,9 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo11x.pt"),
         docs_url=YOLO11_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
 )
@@ -396,6 +489,9 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo12n.pt"),
         docs_url=YOLO12_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -407,6 +503,9 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo12s.pt"),
         docs_url=YOLO12_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -418,6 +517,9 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo12m.pt"),
         docs_url=YOLO12_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -429,6 +531,9 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo12l.pt"),
         docs_url=YOLO12_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -440,6 +545,9 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo12x.pt"),
         docs_url=YOLO12_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
 )
@@ -454,6 +562,9 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo26n.pt"),
         docs_url=YOLO26_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -465,6 +576,9 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo26s.pt"),
         docs_url=YOLO26_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -476,6 +590,9 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo26m.pt"),
         docs_url=YOLO26_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -487,6 +604,9 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo26l.pt"),
         docs_url=YOLO26_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -498,6 +618,9 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         model_url=_asset_url("yolo26x.pt"),
         docs_url=YOLO26_DOCS_URL,
         task="detection",
+        class_space="coco",
+        training_dataset="COCO",
+        checkpoint_format="pt",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
 )
