@@ -1,3 +1,4 @@
+from inspect import signature
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
@@ -32,13 +33,13 @@ def download_huggingface_model(
     dirpath = get_model_dirpath(spec=spec, models_dirpath=models_dirpath)
     dirpath.mkdir(parents=True, exist_ok=True)
     logger.info(f"Downloading Hugging Face model `{spec.name}` to path: '{dirpath}'")
-    snapshot_dirpath = Path(
-        snapshot_download(
-            repo_id=spec.repo_id,
-            local_dir=dirpath,
-            **kwargs,
-        )
-    )
+
+    snapshot_kwargs = {"repo_id": spec.repo_id, "local_dir": dirpath}
+    if "local_dir_use_symlinks" in signature(snapshot_download).parameters:
+        snapshot_kwargs["local_dir_use_symlinks"] = False
+    snapshot_kwargs.update(kwargs)
+
+    snapshot_dirpath = Path(snapshot_download(**snapshot_kwargs))
     filepaths = tuple(filepath for filepath in snapshot_dirpath.rglob("*") if filepath.is_file())
     logger.info(f"Downloaded Hugging Face model `{spec.name}` to path: '{snapshot_dirpath}'")
     return build_downloaded_model(spec=spec, dirpath=snapshot_dirpath, filepaths=filepaths)
