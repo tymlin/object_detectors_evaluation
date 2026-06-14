@@ -27,6 +27,7 @@ class ModelSpec:
     :param class_space: Class label space produced by the model, such as ``coco``.
     :param training_dataset: Human-readable training dataset name when known.
     :param checkpoint_format: Artifact format, such as ``pt``, ``onnx``, or ``engine``.
+    :param inference_engine: Default inference engine name for this model when known.
     :param note: Free-form source note.
     """
 
@@ -43,6 +44,7 @@ class ModelSpec:
     class_space: str | None = None
     training_dataset: str | None = None
     checkpoint_format: str | None = None
+    inference_engine: str | None = None
     note: str = ""
 
     def __post_init__(self) -> None:

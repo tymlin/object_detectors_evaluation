@@ -22,6 +22,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR v2 model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -35,6 +36,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR v2 model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -48,6 +50,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR v2 model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -61,6 +64,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR v2 model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -74,6 +78,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR base model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -87,6 +92,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR base model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -100,6 +106,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR base model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -113,6 +120,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR base model from the PekingU organization page.",
     ),
     ModelSpec(
@@ -126,6 +134,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR model trained with COCO and Objects365.",
     ),
     ModelSpec(
@@ -139,6 +148,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR model trained with COCO and Objects365.",
     ),
     ModelSpec(
@@ -152,6 +162,7 @@ RTDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="RT-DETR model trained with COCO and Objects365.",
     ),
 )

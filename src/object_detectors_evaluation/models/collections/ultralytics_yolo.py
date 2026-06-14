@@ -43,6 +43,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -57,6 +58,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -71,6 +73,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -85,6 +88,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -99,6 +103,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u detection checkpoint.",
     ),
     ModelSpec(
@@ -113,6 +118,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -127,6 +133,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -141,6 +148,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -155,6 +163,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
     ModelSpec(
@@ -169,6 +178,7 @@ YOLOV5U_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv5u P6 detection checkpoint.",
     ),
 )
@@ -186,6 +196,7 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -200,6 +211,7 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -214,6 +226,7 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -228,6 +241,7 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
     ModelSpec(
@@ -242,6 +256,7 @@ YOLOV8_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLOv8 detection checkpoint.",
     ),
 )
@@ -259,6 +274,7 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -273,6 +289,7 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -287,6 +304,7 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -301,6 +319,7 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
     ModelSpec(
@@ -315,6 +334,7 @@ YOLOV9_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv9 detection checkpoint.",
     ),
 )
@@ -332,6 +352,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -346,6 +367,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -360,6 +382,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -374,6 +397,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -388,6 +412,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
     ModelSpec(
@@ -402,6 +427,7 @@ YOLOV10_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics-documented YOLOv10 detection checkpoint.",
     ),
 )
@@ -419,6 +445,7 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -433,6 +460,7 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -447,6 +475,7 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -461,6 +490,7 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
     ModelSpec(
@@ -475,6 +505,7 @@ YOLO11_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO11 detection checkpoint.",
     ),
 )
@@ -492,6 +523,7 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -506,6 +538,7 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -520,6 +553,7 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -534,6 +568,7 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
     ModelSpec(
@@ -548,6 +583,7 @@ YOLO12_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO12 detection checkpoint.",
     ),
 )
@@ -565,6 +601,7 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -579,6 +616,7 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -593,6 +631,7 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -607,6 +646,7 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
     ModelSpec(
@@ -621,6 +661,7 @@ YOLO26_DETECTION_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="pt",
+        inference_engine="ultralytics",
         note="Ultralytics YOLO26 detection checkpoint.",
     ),
 )

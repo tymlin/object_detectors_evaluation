@@ -22,6 +22,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on COCO dataset.",
     ),
     ModelSpec(
@@ -35,6 +36,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on COCO dataset.",
     ),
     ModelSpec(
@@ -48,6 +50,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on COCO dataset.",
     ),
     ModelSpec(
@@ -61,6 +64,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on COCO dataset.",
     ),
     ModelSpec(
@@ -74,6 +78,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on COCO dataset.",
     ),
     ModelSpec(
@@ -87,6 +92,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="objects365",
         training_dataset="Objects365",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on Objects365 dataset.",
     ),
     ModelSpec(
@@ -100,6 +106,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="objects365",
         training_dataset="Objects365",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on Objects365 dataset.",
     ),
     ModelSpec(
@@ -113,6 +120,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="objects365",
         training_dataset="Objects365",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on Objects365 dataset.",
     ),
     ModelSpec(
@@ -126,6 +134,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="objects365",
         training_dataset="Objects365",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Trained on Objects365 dataset.",
     ),
     ModelSpec(
@@ -139,6 +148,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Pretrained on Objects365, then trained on COCO.",
     ),
     ModelSpec(
@@ -152,6 +162,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Pretrained on Objects365, then trained on COCO.",
     ),
     ModelSpec(
@@ -165,6 +176,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Pretrained on Objects365, then trained on COCO.",
     ),
     ModelSpec(
@@ -178,6 +190,7 @@ DFINE_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="Objects365 -> COCO",
         checkpoint_format="safetensors",
+        inference_engine="transformers",
         note="Pretrained on Objects365, then trained on COCO.",
     ),
 )

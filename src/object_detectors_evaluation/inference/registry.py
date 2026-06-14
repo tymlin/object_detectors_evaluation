@@ -44,13 +44,12 @@ def resolve_detection_inference_engine_class(
     if engine_name is not None:
         return get_detection_inference_engine_class(name=engine_name)
 
-    for engine_class in DETECTION_INFERENCE_ENGINE_CLASSES:
-        if model_spec.checkpoint_format in engine_class.supported_checkpoint_formats:
-            return engine_class
+    if model_spec.inference_engine is not None:
+        return get_detection_inference_engine_class(name=model_spec.inference_engine)
 
     msg = (
-        f"Could not resolve detection inference engine for model `{model_spec.name}` "
-        f"with checkpoint format `{model_spec.checkpoint_format}`"
+        f"Model `{model_spec.name}` has no default inference engine. "
+        "Pass `engine_name` explicitly or set `inference_engine` in the model spec."
     )
     logger.error(msg)
     raise ValueError(msg)
