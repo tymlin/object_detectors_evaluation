@@ -2,6 +2,7 @@ from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
+import torch
 from ultralytics import YOLO
 
 from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
@@ -57,6 +58,22 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
             return {int(label): str(name) for label, name in names.items()}
 
         return {label: str(name) for label, name in enumerate(names)}
+
+    @property
+    def dtype(self) -> torch.dtype:
+        """Return model parameter dtype.
+
+        :return: Model dtype.
+        """
+        return next(self.model.model.parameters()).dtype
+
+    @property
+    def device(self) -> torch.device:
+        """Return model parameter device.
+
+        :return: Model device.
+        """
+        return next(self.model.model.parameters()).device
 
     def predict(self, preprocessed_batch: DetectionInputBatch) -> Any:
         """Run Ultralytics detection inference.

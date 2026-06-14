@@ -25,7 +25,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         config: DetectionInferenceConfig | None = None,
     ) -> None:
         engine_config = config or DetectionInferenceConfig()
-        self.device = resolve_torch_device(device=engine_config.device)
+        self.torch_device = resolve_torch_device(device=engine_config.device)
         self.torch_dtype = resolve_torch_dtype(dtype=engine_config.dtype)
         self.max_detections = engine_config.max_detections
 
@@ -38,7 +38,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         self.processor = AutoImageProcessor.from_pretrained(self.downloaded_model.dirpath)
         model = AutoModelForObjectDetection.from_pretrained(self.downloaded_model.dirpath)
-        model = model.to(self.device)
+        model = model.to(self.torch_device)
 
         if self.torch_dtype is not None:
             model = model.to(dtype=self.torch_dtype)
@@ -70,7 +70,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         input_batch = super().preprocess(images=images, image_ids=image_ids)
         inputs = self.processor(images=list(input_batch.processed_inputs), return_tensors="pt")
-        inputs = {name: value.to(self.device) for name, value in inputs.items()}
+        inputs = {name: value.to(self.torch_device) for name, value in inputs.items()}
         return DetectionInputBatch(
             processed_inputs=inputs,
             image_ids=input_batch.image_ids,
@@ -97,7 +97,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         :param raw_outputs: Raw Transformers outputs.
         :return: Normalized detection predictions.
         """
-        target_sizes = torch.tensor(preprocessed_batch.image_sizes, device=self.device)
+        target_sizes = torch.tensor(preprocessed_batch.image_sizes, device=self.torch_device)
         results = self.processor.post_process_object_detection(
             outputs=raw_outputs,
             threshold=self.config.score_threshold,

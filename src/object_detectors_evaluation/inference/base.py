@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import torch
+
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.image_utils import (
     ImageInput,
@@ -68,6 +70,22 @@ class BaseDetectionInferenceEngine(ABC):
         :return: Model class space.
         """
         return self.downloaded_model.spec.class_space
+
+    @property
+    def dtype(self) -> torch.dtype:
+        """Return model parameter dtype.
+
+        :return: Model dtype.
+        """
+        return next(self.model.parameters()).dtype
+
+    @property
+    def device(self) -> torch.device:
+        """Return model parameter device.
+
+        :return: Model device.
+        """
+        return next(self.model.parameters()).device
 
     @property
     def class_id_to_name(self) -> Mapping[int, str] | None:
