@@ -38,19 +38,9 @@ def get_image_size(image: ImageInput) -> tuple[int, int]:
     :param image: NumPy array or torch tensor image.
     :return: Image size as ``(height, width)``.
     """
-    shape = tuple(image.shape)
-    if len(shape) < 2:
-        msg = f"Image input must have at least 2 dimensions, got shape `{shape}`"
-        logger.error(msg)
-        raise ValueError(msg)
-
-    if len(shape) == 2:
-        height, width = shape
+    if isinstance(image, np.ndarray):
+        height, width = image.shape[:2]
         return int(height), int(width)
 
-    if len(shape) == 3 and shape[0] in (1, 3, 4):
-        height, width = shape[1], shape[2]
-        return int(height), int(width)
-
-    height, width = shape[0], shape[1]
+    height, width = image.shape[1:]
     return int(height), int(width)
