@@ -25,7 +25,6 @@ INDEX = 0
 MODEL_NAME = "yolov8n"
 ENGINE_NAME: str | None = None
 DEVICE = "auto"
-BATCH_SIZE = 1
 SCORE_THRESHOLD = 0.25
 MAX_DETECTIONS: int | None = None
 DTYPE: str | None = None
@@ -95,7 +94,6 @@ def main() -> None:
     engine_class = resolve_detection_inference_engine_class(model_spec=model_spec, engine_name=ENGINE_NAME)
     config = DetectionInferenceConfig(
         device=DEVICE,
-        batch_size=BATCH_SIZE,
         score_threshold=SCORE_THRESHOLD,
         max_detections=MAX_DETECTIONS,
         dtype=DTYPE,

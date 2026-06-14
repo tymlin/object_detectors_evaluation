@@ -1,12 +1,10 @@
-from typing import Any, TypeAlias
+from typing import Any
 
 import numpy as np
 import torch
 
+from object_detectors_evaluation.inference.types import ImageInput
 from object_detectors_evaluation.loggers import logger
-
-ImageInput: TypeAlias = np.ndarray | torch.Tensor
-ProcessedInputs: TypeAlias = tuple[ImageInput, ...] | dict[str, torch.Tensor]
 
 
 def validate_image_input(image: Any) -> ImageInput:
@@ -15,7 +13,18 @@ def validate_image_input(image: Any) -> ImageInput:
     :param image: Candidate image input.
     :return: Validated image input.
     """
-    if isinstance(image, (np.ndarray, torch.Tensor)):
+    if isinstance(image, np.ndarray):
+        if image.ndim != 3 or image.shape[-1] != 3:
+            msg = f"NumPy image input must have shape `(H, W, 3)`, got `{tuple(image.shape)}`"
+            logger.error(msg)
+            raise ValueError(msg)
+        return image
+
+    if isinstance(image, torch.Tensor):
+        if image.ndim != 3 or image.shape[0] != 3:
+            msg = f"Torch image input must have shape `(3, H, W)`, got `{tuple(image.shape)}`"
+            logger.error(msg)
+            raise ValueError(msg)
         return image
 
     msg = f"Image input must be a NumPy array or torch tensor, got `{type(image).__name__}`"

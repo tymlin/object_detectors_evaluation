@@ -5,11 +5,11 @@ import numpy as np
 import torch
 from transformers import AutoImageProcessor, AutoModelForObjectDetection
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
+from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
-from object_detectors_evaluation.inference.image_utils import ImageInput
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
 from object_detectors_evaluation.inference.torch_utils import resolve_torch_device, resolve_torch_dtype
+from object_detectors_evaluation.inference.types import ImageId, ImageInput
 from object_detectors_evaluation.models import ModelArtifact
 
 
@@ -69,7 +69,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         :return: Transformers input batch.
         """
         input_batch = super().preprocess(images=images, image_ids=image_ids)
-        inputs = self.processor(images=list(input_batch.processed_inputs), return_tensors="pt")
+        inputs = self.processor(images=input_batch.processed_inputs, return_tensors="pt")
         inputs = {name: value.to(self.torch_device) for name, value in inputs.items()}
         return DetectionInputBatch(
             processed_inputs=inputs,

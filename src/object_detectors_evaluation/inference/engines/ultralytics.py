@@ -1,13 +1,14 @@
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import numpy as np
 import torch
 from ultralytics import YOLO
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
+from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
+from object_detectors_evaluation.inference.types import ImageId, ImageInput
 from object_detectors_evaluation.models import ModelArtifact
 
 
@@ -25,7 +26,6 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
         super().__init__(model_artifact=model_artifact, config=config)
 
         self.predict_kwargs: dict[str, Any] = {
-            "batch": self.config.batch_size,
             "conf": self.config.score_threshold,
             "verbose": False,
         }
@@ -75,14 +75,40 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         return next(self.model.model.parameters()).device
 
+    def preprocess(
+        self,
+        images: Sequence[ImageInput],
+        image_ids: Sequence[ImageId] | None = None,
+    ) -> DetectionInputBatch:
+        """Preprocess images for Ultralytics inference.
+
+        :param images: NumPy arrays or torch tensors.
+        :param image_ids: Optional image ids aligned with ``images``.
+        :return: Ultralytics input batch.
+        """
+        input_batch = super().preprocess(images=images, image_ids=image_ids)
+        processed_inputs = input_batch.processed_inputs
+        if processed_inputs and isinstance(processed_inputs[0], torch.Tensor):
+            processed_inputs = torch.stack(processed_inputs)
+        else:
+            # Ultralytics expects NumPy sources in BGR and flips them to RGB internally.
+            processed_inputs = [
+                image[:, :, ::-1].copy() if isinstance(image, np.ndarray) else image for image in processed_inputs
+            ]
+
+        return DetectionInputBatch(
+            processed_inputs=processed_inputs,
+            image_ids=input_batch.image_ids,
+            image_sizes=input_batch.image_sizes,
+        )
+
     def predict(self, preprocessed_batch: DetectionInputBatch) -> Any:
         """Run Ultralytics detection inference.
 
         :param preprocessed_batch: Common inference batch.
         :return: Raw Ultralytics results.
         """
-        sources = list(preprocessed_batch.processed_inputs)
-        output = self.model.predict(source=sources, **self.predict_kwargs)
+        output = self.model.predict(source=preprocessed_batch.processed_inputs, **self.predict_kwargs)
         return output
 
     def postprocess(self, preprocessed_batch: DetectionInputBatch, raw_outputs: Any) -> DetectionPredictionBatch:

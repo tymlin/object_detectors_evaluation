@@ -12,11 +12,6 @@ class DetectionInferenceConfig(BaseModel):
         default="auto",
         description="Backend-specific device identifier. Engines decide how to interpret `auto`.",
     )
-    batch_size: int = Field(
-        default=1,
-        ge=1,
-        description="Number of images passed to the backend in one inference call.",
-    )
     score_threshold: float = Field(
         default=0.0,
         ge=0,

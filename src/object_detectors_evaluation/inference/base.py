@@ -4,23 +4,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
 
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.image_utils import (
-    ImageInput,
-    ProcessedInputs,
     get_image_size,
     validate_image_input,
 )
 from object_detectors_evaluation.inference.predictions import DetectionPredictionBatch
+from object_detectors_evaluation.inference.types import ImageId, ImageInput, ProcessedInputs
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import ModelArtifact
 
-ImageId = int | str | None
 
-
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class DetectionInputBatch:
     """Common detection input batch.
 
@@ -30,8 +28,8 @@ class DetectionInputBatch:
     """
 
     processed_inputs: ProcessedInputs
-    image_ids: tuple[ImageId, ...]
-    image_sizes: tuple[tuple[int, int], ...]
+    image_ids: list[ImageId]
+    image_sizes: list[tuple[int, int]]
 
 
 class BaseDetectionInferenceEngine(ABC):
@@ -140,9 +138,14 @@ class BaseDetectionInferenceEngine(ABC):
         :param image_ids: Optional image ids aligned with ``images``.
         :return: Common inference batch.
         """
+        if isinstance(images, (np.ndarray, torch.Tensor)):
+            msg = "Inference images must be a sequence of per-image inputs, for example `[image]`"
+            logger.error(msg)
+            raise TypeError(msg)
+
         normalized_image_ids = self.normalize_image_ids(images=images, image_ids=image_ids)
-        processed_inputs = tuple(validate_image_input(image=image) for image in images)
-        image_sizes = tuple(get_image_size(image=image) for image in processed_inputs)
+        processed_inputs = [validate_image_input(image=image) for image in images]
+        image_sizes = [get_image_size(image=image) for image in processed_inputs]
         return DetectionInputBatch(
             processed_inputs=processed_inputs,
             image_ids=normalized_image_ids,
@@ -170,22 +173,22 @@ class BaseDetectionInferenceEngine(ABC):
         self,
         images: Sequence[ImageInput],
         image_ids: Sequence[ImageId] | None,
-    ) -> tuple[ImageId, ...]:
-        """Normalize optional image ids to a tuple aligned with images.
+    ) -> list[ImageId]:
+        """Normalize optional image ids to a list aligned with images.
 
         :param images: Input images.
         :param image_ids: Optional image ids.
         :return: Image ids aligned with ``images``.
         """
         if image_ids is None:
-            return tuple(None for _ in images)
+            return [None for _ in images]
 
         if len(image_ids) != len(images):
             msg = f"Expected `{len(images)}` image ids, got `{len(image_ids)}`"
             logger.error(msg)
             raise ValueError(msg)
 
-        return tuple(image_ids)
+        return list(image_ids)
 
     def get_label_name(self, label: int) -> str:
         """Return a model-native label name.
