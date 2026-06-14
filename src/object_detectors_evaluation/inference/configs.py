@@ -20,11 +20,11 @@ class DetectionInferenceConfig(BaseModel):
         ge=1,
         description="Number of images passed to the backend in one inference call.",
     )
-    score_threshold: float | None = Field(
-        default=None,
+    score_threshold: float = Field(
+        default=0.0,
         ge=0,
         le=1,
-        description="Optional confidence threshold applied by the engine or postprocessor.",
+        description="Confidence threshold applied by the engine or postprocessor.",
     )
     max_detections: int | None = Field(
         default=None,

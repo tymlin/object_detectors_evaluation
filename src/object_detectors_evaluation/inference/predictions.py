@@ -1,5 +1,5 @@
 from collections.abc import Iterator
-from typing import Self
+from typing import Any, Self
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -31,14 +31,14 @@ class DetectionPrediction(BaseModel):
         default=None,
         description="Optional class space produced by the model, such as `coco`.",
     )
-    metadata: dict[str, object] = Field(
+    metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Optional backend-specific metadata for debugging.",
     )
 
     @field_validator("boxes", mode="before")
     @classmethod
-    def validate_boxes_array(cls, value: object) -> np.ndarray:
+    def validate_boxes_array(cls, value: Any) -> np.ndarray:
         """Convert prediction boxes to a float32 NumPy array.
 
         :param value: Raw boxes value.
@@ -48,7 +48,7 @@ class DetectionPrediction(BaseModel):
 
     @field_validator("scores", mode="before")
     @classmethod
-    def validate_scores_array(cls, value: object) -> np.ndarray:
+    def validate_scores_array(cls, value: Any) -> np.ndarray:
         """Convert prediction scores to a float32 NumPy array.
 
         :param value: Raw scores value.
@@ -58,7 +58,7 @@ class DetectionPrediction(BaseModel):
 
     @field_validator("labels", mode="before")
     @classmethod
-    def validate_labels_array(cls, value: object) -> np.ndarray:
+    def validate_labels_array(cls, value: Any) -> np.ndarray:
         """Convert prediction labels to an int64 NumPy array.
 
         :param value: Raw labels value.

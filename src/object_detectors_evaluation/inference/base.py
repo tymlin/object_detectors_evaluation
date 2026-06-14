@@ -1,18 +1,35 @@
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
-
-import numpy as np
-from PIL.Image import Image as PILImage
+from typing import Any
 
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
+from object_detectors_evaluation.inference.image_utils import (
+    ImageInput,
+    ProcessedInputs,
+    get_image_size,
+    validate_image_input,
+)
 from object_detectors_evaluation.inference.predictions import DetectionPredictionBatch
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import DownloadedModel
 
-ImageInput = PILImage | np.ndarray | str | Path
 ImageId = int | str | None
+
+
+@dataclass(frozen=True, slots=True)
+class DetectionInputBatch:
+    """Common detection input batch.
+
+    :param processed_inputs: Validated image inputs passed to backend inference.
+    :param image_ids: Optional image ids aligned with ``processed_inputs``.
+    :param image_sizes: Original image sizes as ``(height, width)``.
+    """
+
+    processed_inputs: ProcessedInputs
+    image_ids: tuple[ImageId, ...]
+    image_sizes: tuple[tuple[int, int], ...]
 
 
 class BaseDetectionInferenceEngine(ABC):
@@ -22,9 +39,9 @@ class BaseDetectionInferenceEngine(ABC):
     :param config: Runtime-neutral inference config.
     """
 
-    engine_name: ClassVar[str] = "base"
-    supported_families: ClassVar[tuple[str, ...]] = ()
-    supported_checkpoint_formats: ClassVar[tuple[str, ...]] = ()
+    engine_name = "base"
+    supported_families: tuple[str, ...] = ()
+    supported_checkpoint_formats: tuple[str, ...] = ()
 
     def __init__(
         self,
@@ -53,15 +70,27 @@ class BaseDetectionInferenceEngine(ABC):
         return self.downloaded_model.spec.class_space
 
     @property
-    def class_names(self) -> tuple[str, ...] | None:
-        """Return model-native class names when the engine can expose them.
+    def class_id_to_name(self) -> Mapping[int, str] | None:
+        """Return model-native label names keyed by model label id.
 
-        :return: Model-native class names or ``None``.
+        :return: Label-name mapping or ``None``.
         """
         return None
 
+    @property
+    def class_name_to_id(self) -> Mapping[str, int] | None:
+        """Return model-native label ids keyed by model class name.
+
+        :return: Class-name mapping or ``None``.
+        """
+        class_id_to_name = self.class_id_to_name
+        if class_id_to_name is None:
+            return None
+
+        return {class_name: class_id for class_id, class_name in class_id_to_name.items()}
+
     @abstractmethod
-    def load_model(self) -> object:
+    def load_model(self) -> Any:
         """Load backend-specific model artifacts.
 
         :return: Loaded backend-specific model object.
@@ -74,22 +103,48 @@ class BaseDetectionInferenceEngine(ABC):
     ) -> DetectionPredictionBatch:
         """Run object detection for a batch of images.
 
-        :param images: Images or image paths.
+        :param images: NumPy arrays or torch tensors.
         :param image_ids: Optional image ids aligned with ``images``.
         :return: Normalized detection predictions.
         """
-        return self.predict(images=images, image_ids=image_ids)
+        preprocessed_batch = self.preprocess(images=images, image_ids=image_ids)
+        raw_outputs = self.predict(preprocessed_batch=preprocessed_batch)
+        return self.postprocess(preprocessed_batch=preprocessed_batch, raw_outputs=raw_outputs)
 
-    @abstractmethod
-    def predict(
+    def preprocess(
         self,
         images: Sequence[ImageInput],
         image_ids: Sequence[ImageId] | None = None,
-    ) -> DetectionPredictionBatch:
-        """Run object detection for a batch of images.
+    ) -> DetectionInputBatch:
+        """Validate images and create a common inference batch.
 
-        :param images: Images or image paths.
+        :param images: NumPy arrays or torch tensors.
         :param image_ids: Optional image ids aligned with ``images``.
+        :return: Common inference batch.
+        """
+        normalized_image_ids = self.normalize_image_ids(images=images, image_ids=image_ids)
+        processed_inputs = tuple(validate_image_input(image=image) for image in images)
+        image_sizes = tuple(get_image_size(image=image) for image in processed_inputs)
+        return DetectionInputBatch(
+            processed_inputs=processed_inputs,
+            image_ids=normalized_image_ids,
+            image_sizes=image_sizes,
+        )
+
+    @abstractmethod
+    def predict(self, preprocessed_batch: DetectionInputBatch) -> Any:
+        """Run backend inference on a preprocessed batch.
+
+        :param preprocessed_batch: Common inference batch.
+        :return: Backend-specific raw model outputs.
+        """
+
+    @abstractmethod
+    def postprocess(self, preprocessed_batch: DetectionInputBatch, raw_outputs: Any) -> DetectionPredictionBatch:
+        """Convert backend raw outputs to normalized detection predictions.
+
+        :param preprocessed_batch: Common inference batch.
+        :param raw_outputs: Backend-specific raw model outputs.
         :return: Normalized detection predictions.
         """
 
@@ -113,6 +168,18 @@ class BaseDetectionInferenceEngine(ABC):
             raise ValueError(msg)
 
         return tuple(image_ids)
+
+    def get_label_name(self, label: int) -> str:
+        """Return a model-native label name.
+
+        :param label: Model-native integer label id.
+        :return: Label name when known, otherwise the label id as a string.
+        """
+        class_id_to_name = self.class_id_to_name
+        if class_id_to_name is None:
+            return str(label)
+
+        return str(class_id_to_name.get(int(label), label))
 
     def resolve_model_filepath(self, filesuffixes: tuple[str, ...] = ()) -> Path:
         """Resolve a single model artifact filepath from downloaded model files.

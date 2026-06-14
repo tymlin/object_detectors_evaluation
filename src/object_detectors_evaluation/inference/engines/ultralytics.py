@@ -1,10 +1,13 @@
-from collections.abc import Sequence
+from collections.abc import Mapping
+from typing import Any
 
 import numpy as np
 from ultralytics import YOLO
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, ImageId, ImageInput
+from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
+from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
+from object_detectors_evaluation.models import DownloadedModel
 
 
 class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
@@ -13,7 +16,26 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
     engine_name = "ultralytics"
     supported_checkpoint_formats = ("pt",)
 
-    def load_model(self) -> object:
+    def __init__(
+        self,
+        downloaded_model: DownloadedModel,
+        config: DetectionInferenceConfig | None = None,
+    ) -> None:
+        super().__init__(downloaded_model=downloaded_model, config=config)
+
+        self.predict_kwargs: dict[str, Any] = {
+            "batch": self.config.batch_size,
+            "conf": self.config.score_threshold,
+            "verbose": False,
+        }
+        if self.config.device != "auto":
+            self.predict_kwargs["device"] = self.config.device
+        if self.config.max_detections is not None:
+            self.predict_kwargs["max_det"] = self.config.max_detections
+        if self.config.dtype == "float16":
+            self.predict_kwargs["half"] = True
+
+    def load_model(self) -> YOLO:
         """Load an Ultralytics model checkpoint.
 
         :return: Loaded Ultralytics model.
@@ -22,54 +44,55 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
         return YOLO(filepath)
 
     @property
-    def class_names(self) -> tuple[str, ...] | None:
-        """Return model-native class names when available.
+    def class_id_to_name(self) -> Mapping[int, str] | None:
+        """Return Ultralytics label names keyed by label id.
 
-        :return: Model-native class names or ``None``.
+        :return: Label-name mapping or ``None``.
         """
         names = getattr(self.model, "names", None)
         if names is None:
             return None
 
         if isinstance(names, dict):
-            return tuple(str(names[idx]) for idx in sorted(names))
+            return {int(label): str(name) for label, name in names.items()}
 
-        return tuple(str(name) for name in names)
+        return {label: str(name) for label, name in enumerate(names)}
 
-    def predict(
-        self,
-        images: Sequence[ImageInput],
-        image_ids: Sequence[ImageId] | None = None,
-    ) -> DetectionPredictionBatch:
+    def predict(self, preprocessed_batch: DetectionInputBatch) -> Any:
         """Run Ultralytics detection inference.
 
-        :param images: Images or image paths.
-        :param image_ids: Optional image ids aligned with ``images``.
+        :param preprocessed_batch: Common inference batch.
+        :return: Raw Ultralytics results.
+        """
+        sources = list(preprocessed_batch.processed_inputs)
+        output = self.model.predict(source=sources, **self.predict_kwargs)
+        return output
+
+    def postprocess(self, preprocessed_batch: DetectionInputBatch, raw_outputs: Any) -> DetectionPredictionBatch:
+        """Convert Ultralytics results to normalized predictions.
+
+        :param preprocessed_batch: Common inference batch.
+        :param raw_outputs: Raw Ultralytics results.
         :return: Normalized detection predictions.
         """
-        normalized_image_ids = self.normalize_image_ids(images=images, image_ids=image_ids)
-        predict_kwargs = {
-            "batch": self.config.batch_size,
-            "verbose": False,
-        }
-        if self.config.device != "auto":
-            predict_kwargs["device"] = self.config.device
-        if self.config.score_threshold is not None:
-            predict_kwargs["conf"] = self.config.score_threshold
-        if self.config.max_detections is not None:
-            predict_kwargs["max_det"] = self.config.max_detections
-        if self.config.dtype == "float16":
-            predict_kwargs["half"] = True
-
-        sources = tuple(str(image) if hasattr(image, "__fspath__") else image for image in images)
-        results = self.model.predict(source=list(sources), **predict_kwargs)
+        results = tuple(raw_outputs)
         predictions = tuple(
-            self._prediction_from_result(result=result, image_id=image_id)
-            for result, image_id in zip(results, normalized_image_ids, strict=True)
+            self._prediction_from_result(result=result, image_id=image_id, image_size=image_size)
+            for result, image_id, image_size in zip(
+                results,
+                preprocessed_batch.image_ids,
+                preprocessed_batch.image_sizes,
+                strict=True,
+            )
         )
         return DetectionPredictionBatch(predictions=predictions)
 
-    def _prediction_from_result(self, result: object, image_id: ImageId) -> DetectionPrediction:
+    def _prediction_from_result(
+        self,
+        result: Any,
+        image_id: ImageId,
+        image_size: tuple[int, int],
+    ) -> DetectionPrediction:
         boxes_result = getattr(result, "boxes", None)
         if boxes_result is None or len(boxes_result) == 0:
             return DetectionPrediction(
@@ -78,36 +101,20 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
                 labels=np.empty((0,), dtype=np.int64),
                 labels_names=(),
                 image_id=image_id,
-                image_size=self._image_size_from_result(result=result),
+                image_size=image_size,
                 class_space=self.class_space,
             )
 
         boxes = boxes_result.xyxy.cpu().numpy()
         scores = boxes_result.conf.cpu().numpy()
         labels = boxes_result.cls.cpu().numpy().astype(np.int64)
-        labels_names = tuple(self._label_name(label=label) for label in labels)
+        labels_names = tuple(self.get_label_name(label=label) for label in labels)
         return DetectionPrediction(
             boxes=boxes,
             scores=scores,
             labels=labels,
             labels_names=labels_names,
             image_id=image_id,
-            image_size=self._image_size_from_result(result=result),
+            image_size=image_size,
             class_space=self.class_space,
         )
-
-    def _label_name(self, label: int) -> str:
-        names = getattr(self.model, "names", None)
-        if isinstance(names, dict):
-            return str(names.get(int(label), label))
-        if names is not None and 0 <= int(label) < len(names):
-            return str(names[int(label)])
-        return str(label)
-
-    @staticmethod
-    def _image_size_from_result(result: object) -> tuple[int, int] | None:
-        image_size = getattr(result, "orig_shape", None)
-        if image_size is None:
-            return None
-        height, width = image_size
-        return int(height), int(width)

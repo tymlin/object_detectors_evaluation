@@ -1,5 +1,7 @@
 from typing import Literal
 
+import numpy as np
+
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH, MODELS_DIRPATH
 from object_detectors_evaluation.datasets import BaseDetectionDataset, COCODataset, OpenImagesDataset
 from object_detectors_evaluation.inference import DetectionInferenceConfig, resolve_detection_inference_engine_class
@@ -19,12 +21,14 @@ REMOVE_EMPTY_IMAGES = False
 INDEX = 0
 
 MODEL_NAME = "yolov8n"
+# MODEL_NAME = "dfine-small-obj365"
 ENGINE_NAME: str | None = None
 DEVICE = "auto"
 BATCH_SIZE = 1
 SCORE_THRESHOLD = 0.25
 MAX_DETECTIONS: int | None = None
 DTYPE: str | None = None
+# DTYPE: str | None = "float32"
 OVERWRITE_MODEL = False
 TOP_K_LOGGED_PREDICTIONS = 10
 
@@ -91,7 +95,8 @@ def main() -> None:
         dtype=DTYPE,
     )
     engine = engine_class(downloaded_model=downloaded_model, config=config)
-    prediction_batch = engine(images=[image], image_ids=[image_id])
+    image_array = np.asarray(image)
+    prediction_batch = engine(images=[image_array], image_ids=[image_id])
     prediction = prediction_batch.predictions[0]
 
     logger.info(
