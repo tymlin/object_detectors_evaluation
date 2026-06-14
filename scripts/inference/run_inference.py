@@ -1,19 +1,20 @@
-from typing import Literal
-
 import numpy as np
 
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH, MODELS_DIRPATH
-from object_detectors_evaluation.datasets import BaseDetectionDataset, COCODataset, OpenImagesDataset
+from object_detectors_evaluation.datasets import (
+    BaseDetectionDataset,
+    COCODataset,
+    DatasetName,
+    DatasetSplit,
+    OpenImagesDataset,
+)
 from object_detectors_evaluation.inference import DetectionInferenceConfig, resolve_detection_inference_engine_class
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models.downloaders import download_model
 from object_detectors_evaluation.models.registry import get_detection_model_spec
-from object_detectors_evaluation.utils.types import Split
-
-DatasetName = Literal["coco", "open_images"]
 
 DATASET_NAME: DatasetName = "coco"
-SPLIT: Split = "validation"
+SPLIT: DatasetSplit = "validation"
 CLASSES_OF_INTEREST: list[str] | None = None
 INCLUDE_CROWD = True
 DROP_IMAGES_WITH_CROWD = False
@@ -21,14 +22,12 @@ REMOVE_EMPTY_IMAGES = False
 INDEX = 0
 
 MODEL_NAME = "yolov8n"
-# MODEL_NAME = "dfine-small-obj365"
 ENGINE_NAME: str | None = None
 DEVICE = "auto"
 BATCH_SIZE = 1
 SCORE_THRESHOLD = 0.25
 MAX_DETECTIONS: int | None = None
 DTYPE: str | None = None
-# DTYPE: str | None = "float32"
 OVERWRITE_MODEL = False
 TOP_K_LOGGED_PREDICTIONS = 10
 

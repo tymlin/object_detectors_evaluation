@@ -1,5 +1,5 @@
 from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
-from object_detectors_evaluation.inference.configs import DetectionInferenceConfig, InferenceDevice, InferenceDType
+from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.image_utils import ImageInput, ProcessedInputs
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
 from object_detectors_evaluation.inference.registry import (
@@ -9,6 +9,7 @@ from object_detectors_evaluation.inference.registry import (
     get_detection_inference_engine_class,
     resolve_detection_inference_engine_class,
 )
+from object_detectors_evaluation.inference.types import InferenceDevice, InferenceDType
 
 __all__ = [
     "BaseDetectionInferenceEngine",

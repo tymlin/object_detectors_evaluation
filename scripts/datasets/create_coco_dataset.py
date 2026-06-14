@@ -1,10 +1,9 @@
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
-from object_detectors_evaluation.datasets import COCODataset
+from object_detectors_evaluation.datasets import COCODataset, DatasetSplit
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
 DATASET_DIRPATH = FIFTYONE_DATASETS_DIRPATH / "coco-2017"
-SPLIT: Split = "validation"
+SPLIT: DatasetSplit = "validation"
 CLASSES_OF_INTEREST = ["person"]
 INCLUDE_CROWD = True
 DROP_IMAGES_WITH_CROWD = False

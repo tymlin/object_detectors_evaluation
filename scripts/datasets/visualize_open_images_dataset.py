@@ -5,12 +5,11 @@ import torch
 from torchvision.transforms import v2
 
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
-from object_detectors_evaluation.datasets import OpenImagesDataset
+from object_detectors_evaluation.datasets import DatasetSplit, OpenImagesDataset
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
 DATASET_DIRPATH = FIFTYONE_DATASETS_DIRPATH / "open-images-v7"
-SPLIT: Split = "test"
+SPLIT: DatasetSplit = "test"
 CLASSES_OF_INTEREST = ["Person"]
 
 NUM_SAMPLES = 5

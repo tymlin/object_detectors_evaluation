@@ -1,9 +1,6 @@
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict, Field
 
-InferenceDevice = Literal["auto", "cpu", "cuda", "mps"]
-InferenceDType = Literal["auto", "float32", "float16", "bfloat16"]
+from object_detectors_evaluation.inference.types import InferenceDevice, InferenceDType
 
 
 class DetectionInferenceConfig(BaseModel):

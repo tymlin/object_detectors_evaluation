@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from object_detectors_evaluation.utils.types import Split
+from object_detectors_evaluation.datasets.types import DatasetSplit
 
 from .base import (
     BaseDetectionDataset,
@@ -38,7 +38,7 @@ class OpenImagesDataset(BaseDetectionDataset):
     def __init__(
         self,
         dataset_dirpath: str | Path,
-        split: Split,
+        split: DatasetSplit,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,

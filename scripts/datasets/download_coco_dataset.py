@@ -1,9 +1,9 @@
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
+from object_detectors_evaluation.datasets import DatasetSplit
 from object_detectors_evaluation.datasets.fiftyone import download_coco_dataset
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
-SPLIT: Split = "validation"
+SPLIT: DatasetSplit = "validation"
 CLASSES_OF_INTEREST = ["person"]
 MAX_SAMPLES: int | None = 5
 

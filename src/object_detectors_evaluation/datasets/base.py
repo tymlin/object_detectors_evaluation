@@ -15,8 +15,8 @@ from PIL import Image
 from torch import Tensor
 from torchvision.datasets.vision import VisionDataset
 
+from object_detectors_evaluation.datasets.types import DatasetSplit
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
 DetectionTarget = dict[str, Any]
 
@@ -115,7 +115,7 @@ class BaseDetectionDataset(VisionDataset):
     def __init__(
         self,
         dataset_dirpath: str | Path,
-        split: Split,
+        split: DatasetSplit,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,

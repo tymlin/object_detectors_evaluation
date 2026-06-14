@@ -7,8 +7,8 @@ from typing import Any, Callable
 import numpy as np
 from PIL import Image
 
+from object_detectors_evaluation.datasets.types import DatasetSplit
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
 from .base import (
     BaseDetectionDataset,
@@ -37,7 +37,7 @@ class COCODataset(BaseDetectionDataset):
     def __init__(
         self,
         dataset_dirpath: str | Path,
-        split: Split,
+        split: DatasetSplit,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,

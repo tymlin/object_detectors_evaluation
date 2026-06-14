@@ -7,8 +7,8 @@ import fiftyone as fo
 import fiftyone.zoo as foz
 
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
+from object_detectors_evaluation.datasets.types import DatasetSplit
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.utils.types import Split
 
 COCO_2017_DATASET_NAME = "coco-2017"
 OPEN_IMAGES_V7_DATASET_NAME = "open-images-v7"
@@ -30,7 +30,7 @@ def configure_fiftyone_dataset_dir(dataset_dirpath: str | Path) -> Path:
 
 def download_coco_dataset(
     dataset_dirpath: str | Path | None = FIFTYONE_DATASETS_DIRPATH,
-    split: Split = "validation",
+    split: DatasetSplit = "validation",
     classes: Sequence[str] | None = None,
     max_samples: int | None = None,
     label_types: Sequence[str] = ("detections",),
@@ -59,7 +59,7 @@ def download_coco_dataset(
 
 def download_open_images_dataset(
     dataset_dirpath: str | Path | None = FIFTYONE_DATASETS_DIRPATH,
-    split: Split = "test",
+    split: DatasetSplit = "test",
     classes: Sequence[str] | None = None,
     max_samples: int | None = None,
     label_types: Sequence[str] = ("detections",),
@@ -89,7 +89,7 @@ def download_open_images_dataset(
 def download_zoo_detection_dataset(
     dataset_name: str,
     dataset_dirpath: str | Path | None,
-    split: Split,
+    split: DatasetSplit,
     classes: Sequence[str] | None = None,
     max_samples: int | None = None,
     label_types: Sequence[str] = ("detections",),

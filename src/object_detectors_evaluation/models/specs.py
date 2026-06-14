@@ -2,12 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal
 
 from object_detectors_evaluation.loggers import logger
-
-ModelSourceType = Literal["huggingface", "url", "local"]
-ModelTask = Literal["detection"]
+from object_detectors_evaluation.models.types import ModelSourceType, ModelTask
 
 
 @dataclass(frozen=True, slots=True)
