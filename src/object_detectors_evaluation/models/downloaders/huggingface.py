@@ -6,7 +6,7 @@ from huggingface_hub import snapshot_download
 from object_detectors_evaluation.consts import MODELS_DIRPATH
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import DownloadedModel, ModelSpec
-from object_detectors_evaluation.models.downloaders.base import build_downloaded_model, get_model_dirpath
+from object_detectors_evaluation.models.downloaders.utils import build_downloaded_model, get_model_dirpath
 
 
 def download_huggingface_model(
