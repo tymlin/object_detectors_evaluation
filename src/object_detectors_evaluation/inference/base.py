@@ -15,7 +15,7 @@ from object_detectors_evaluation.inference.image_utils import (
 )
 from object_detectors_evaluation.inference.predictions import DetectionPredictionBatch
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.models import DownloadedModel
+from object_detectors_evaluation.models import ModelArtifact
 
 ImageId = int | str | None
 
@@ -37,7 +37,7 @@ class DetectionInputBatch:
 class BaseDetectionInferenceEngine(ABC):
     """Base class for detection inference engines.
 
-    :param downloaded_model: Local model artifacts and source metadata.
+    :param model_artifact: Local model artifact and source metadata.
     :param config: Runtime-neutral inference config.
     """
 
@@ -47,19 +47,19 @@ class BaseDetectionInferenceEngine(ABC):
 
     def __init__(
         self,
-        downloaded_model: DownloadedModel,
+        model_artifact: ModelArtifact,
         config: DetectionInferenceConfig | None = None,
     ) -> None:
-        if downloaded_model.spec.task != "detection":
-            msg = f"Model `{downloaded_model.spec.name}` has task `{downloaded_model.spec.task}`, expected `detection`"
+        if model_artifact.spec.task != "detection":
+            msg = f"Model `{model_artifact.spec.name}` has task `{model_artifact.spec.task}`, expected `detection`"
             logger.error(msg)
             raise ValueError(msg)
 
-        self.downloaded_model = downloaded_model
+        self.model_artifact = model_artifact
         self.config = config or DetectionInferenceConfig()
         logger.info(
-            f"Initializing inference engine `{self.engine_name}` for model `{downloaded_model.spec.name}` "
-            f"from path: '{downloaded_model.dirpath}'"
+            f"Initializing inference engine `{self.engine_name}` for model `{model_artifact.spec.name}` "
+            f"from path: '{model_artifact.dirpath}'"
         )
         self.model = self.load_model()
 
@@ -69,7 +69,7 @@ class BaseDetectionInferenceEngine(ABC):
 
         :return: Model class space.
         """
-        return self.downloaded_model.spec.class_space
+        return self.model_artifact.spec.class_space
 
     @property
     def dtype(self) -> torch.dtype:
@@ -205,18 +205,18 @@ class BaseDetectionInferenceEngine(ABC):
         :param filesuffixes: Optional allowed file suffixes.
         :return: Resolved model artifact filepath.
         """
-        if self.downloaded_model.spec.resolved_filename is not None:
-            filepath = self.downloaded_model.dirpath / self.downloaded_model.spec.resolved_filename
+        if self.model_artifact.spec.resolved_filename is not None:
+            filepath = self.model_artifact.dirpath / self.model_artifact.spec.resolved_filename
             if filepath.exists():
                 return filepath
 
-        filepaths = self.downloaded_model.filepaths
+        filepaths = self.model_artifact.filepaths
         if filesuffixes:
             filepaths = tuple(filepath for filepath in filepaths if filepath.suffix in filesuffixes)
 
         if len(filepaths) != 1:
             msg = (
-                f"Could not resolve one model artifact for `{self.downloaded_model.spec.name}`, "
+                f"Could not resolve one model artifact for `{self.model_artifact.spec.name}`, "
                 f"found `{len(filepaths)}` candidates"
             )
             logger.error(msg)

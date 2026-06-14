@@ -10,7 +10,7 @@ from object_detectors_evaluation.inference.configs import DetectionInferenceConf
 from object_detectors_evaluation.inference.image_utils import ImageInput
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
 from object_detectors_evaluation.inference.torch_utils import resolve_torch_device, resolve_torch_dtype
-from object_detectors_evaluation.models import DownloadedModel
+from object_detectors_evaluation.models import ModelArtifact
 
 
 class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
@@ -21,7 +21,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
 
     def __init__(
         self,
-        downloaded_model: DownloadedModel,
+        model_artifact: ModelArtifact,
         config: DetectionInferenceConfig | None = None,
     ) -> None:
         engine_config = config or DetectionInferenceConfig()
@@ -29,15 +29,15 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         self.torch_dtype = resolve_torch_dtype(dtype=engine_config.dtype)
         self.max_detections = engine_config.max_detections
 
-        super().__init__(downloaded_model=downloaded_model, config=engine_config)
+        super().__init__(model_artifact=model_artifact, config=engine_config)
 
     def load_model(self) -> Any:
         """Load a Hugging Face Transformers object detection model.
 
         :return: Loaded Transformers model.
         """
-        self.processor = AutoImageProcessor.from_pretrained(self.downloaded_model.dirpath)
-        model = AutoModelForObjectDetection.from_pretrained(self.downloaded_model.dirpath)
+        self.processor = AutoImageProcessor.from_pretrained(self.model_artifact.dirpath)
+        model = AutoModelForObjectDetection.from_pretrained(self.model_artifact.dirpath)
         model = model.to(self.torch_device)
 
         if self.torch_dtype is not None:

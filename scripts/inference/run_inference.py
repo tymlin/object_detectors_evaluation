@@ -6,6 +6,7 @@ from object_detectors_evaluation.datasets import (
     COCODataset,
     DatasetName,
     DatasetSplit,
+    DetectionDatasetConfig,
     OpenImagesDataset,
 )
 from object_detectors_evaluation.inference import DetectionInferenceConfig, resolve_detection_inference_engine_class
@@ -40,7 +41,7 @@ def create_dataset() -> BaseDetectionDataset:
     if DATASET_NAME == "coco":
         dataset_dirpath = FIFTYONE_DATASETS_DIRPATH / "coco-2017"
         logger.info(f"Creating dataset `COCO` (split: {SPLIT}) from path: '{dataset_dirpath}'")
-        return COCODataset(
+        config = DetectionDatasetConfig(
             dataset_dirpath=dataset_dirpath,
             split=SPLIT,
             classes_of_interest=CLASSES_OF_INTEREST,
@@ -48,17 +49,23 @@ def create_dataset() -> BaseDetectionDataset:
             drop_images_with_crowd=DROP_IMAGES_WITH_CROWD,
             remove_empty_images=REMOVE_EMPTY_IMAGES,
         )
+        return COCODataset(
+            config=config,
+        )
 
     if DATASET_NAME == "open_images":
         dataset_dirpath = FIFTYONE_DATASETS_DIRPATH / "open-images-v7"
         logger.info(f"Creating dataset `Open Images` (split: {SPLIT}) from path: '{dataset_dirpath}'")
-        return OpenImagesDataset(
+        config = DetectionDatasetConfig(
             dataset_dirpath=dataset_dirpath,
             split=SPLIT,
             classes_of_interest=CLASSES_OF_INTEREST,
             include_crowd=INCLUDE_CROWD,
             drop_images_with_crowd=DROP_IMAGES_WITH_CROWD,
             remove_empty_images=REMOVE_EMPTY_IMAGES,
+        )
+        return OpenImagesDataset(
+            config=config,
         )
 
     msg = f"Unsupported dataset `{DATASET_NAME}`"
@@ -78,12 +85,12 @@ def main() -> None:
     model_spec = get_detection_model_spec(MODEL_NAME)
     logger.info(f"Preparing model `{model_spec.name}` from path: '{MODELS_DIRPATH}'")
     download_kwargs = {"overwrite": OVERWRITE_MODEL} if model_spec.source_type == "url" else {}
-    downloaded_model = download_model(
+    model_artifact = download_model(
         spec=model_spec,
         models_dirpath=MODELS_DIRPATH,
         **download_kwargs,
     )
-    logger.info(f"Model `{downloaded_model.spec.name}` ready at path: '{downloaded_model.dirpath}'")
+    logger.info(f"Model `{model_artifact.spec.name}` ready at path: '{model_artifact.dirpath}'")
 
     engine_class = resolve_detection_inference_engine_class(model_spec=model_spec, engine_name=ENGINE_NAME)
     config = DetectionInferenceConfig(
@@ -93,7 +100,7 @@ def main() -> None:
         max_detections=MAX_DETECTIONS,
         dtype=DTYPE,
     )
-    engine = engine_class(downloaded_model=downloaded_model, config=config)
+    engine = engine_class(model_artifact=model_artifact, config=config)
     image_array = np.asarray(image)
     prediction_batch = engine(images=[image_array], image_ids=[image_id])
     prediction = prediction_batch.predictions[0]

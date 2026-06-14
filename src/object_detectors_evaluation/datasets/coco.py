@@ -7,7 +7,7 @@ from typing import Any, Callable
 import numpy as np
 from PIL import Image
 
-from object_detectors_evaluation.datasets.types import DatasetSplit
+from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.loggers import logger
 
 from .base import (
@@ -23,43 +23,28 @@ class COCODataset(BaseDetectionDataset):
     Expected layout is ``<dataset_dirpath>/<split>/data`` for images and
     ``<dataset_dirpath>/<split>/labels.json`` for COCO annotations.
 
-    :param dataset_dirpath: Root directory of the downloaded COCO dataset.
-    :param split: Dataset split to load.
+    :param config: Detection dataset configuration.
     :param transforms: Optional callable applied jointly to image and target by TorchVision.
     :param transform: Optional image-only transform passed to ``VisionDataset``.
     :param target_transform: Optional target-only transform passed to ``VisionDataset``.
-    :param classes_of_interest: Optional COCO class names to keep.
-    :param include_crowd: Whether to keep COCO ``iscrowd`` annotations.
-    :param drop_images_with_crowd: Whether to remove images that contain matching ``iscrowd`` annotations.
-    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
     """
 
     def __init__(
         self,
-        dataset_dirpath: str | Path,
-        split: DatasetSplit,
+        config: DetectionDatasetConfig,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
-        classes_of_interest: list[str] | None = None,
-        include_crowd: bool = True,
-        drop_images_with_crowd: bool = False,
-        remove_empty_images: bool = False,
     ) -> None:
         super().__init__(
-            dataset_dirpath=dataset_dirpath,
-            split=split,
+            config=config,
             transforms=transforms,
             transform=transform,
             target_transform=target_transform,
-            classes_of_interest=classes_of_interest,
-            include_crowd=include_crowd,
-            drop_images_with_crowd=drop_images_with_crowd,
-            remove_empty_images=remove_empty_images,
         )
 
-        self.images_dirpath = self.dataset_dirpath / split / "data"
-        self.annotations_filepath = self.dataset_dirpath / split / "labels.json"
+        self.images_dirpath = self.dataset_dirpath / self.split / "data"
+        self.annotations_filepath = self.dataset_dirpath / self.split / "labels.json"
         self.info_filepath = self.dataset_dirpath / "info.json"
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 

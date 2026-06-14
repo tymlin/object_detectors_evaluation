@@ -15,7 +15,7 @@ from PIL import Image
 from torch import Tensor
 from torchvision.datasets.vision import VisionDataset
 
-from object_detectors_evaluation.datasets.types import DatasetSplit
+from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.loggers import logger
 
 DetectionTarget = dict[str, Any]
@@ -99,44 +99,35 @@ class DetectionClassMap:
 class BaseDetectionDataset(VisionDataset):
     """Base class for object detection datasets backed by local image and annotation files.
 
-    :param dataset_dirpath: Root directory of the downloaded dataset.
-    :param split: Dataset split to load.
+    :param config: Detection dataset configuration.
     :param transforms: Optional callable applied jointly to image and target by TorchVision.
     :param transform: Optional image-only transform passed to ``VisionDataset``.
     :param target_transform: Optional target-only transform passed to ``VisionDataset``.
-    :param classes_of_interest: Optional class names to keep.
-    :param include_crowd: Whether to keep crowd or group-of annotations in returned targets.
-    :param drop_images_with_crowd: Whether to remove images that contain crowd or group-of annotations.
-    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
     """
 
     collate_fn: Callable | None = staticmethod(detection_collate_fn)
 
     def __init__(
         self,
-        dataset_dirpath: str | Path,
-        split: DatasetSplit,
+        config: DetectionDatasetConfig,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
-        classes_of_interest: list[str] | None = None,
-        include_crowd: bool = True,
-        drop_images_with_crowd: bool = False,
-        remove_empty_images: bool = False,
     ) -> None:
-        self.dataset_dirpath = Path(dataset_dirpath)
+        self.config = config
+        self.dataset_dirpath = config.dataset_dirpath
         super().__init__(
             root=str(self.dataset_dirpath),
             transforms=transforms,
             transform=transform,
             target_transform=target_transform,
         )
-        self.split = split
-        self.name = f"{self.dataset_dirpath.name}-{split}"
-        self.classes_of_interest = classes_of_interest
-        self.include_crowd = include_crowd
-        self.drop_images_with_crowd = drop_images_with_crowd
-        self.remove_empty_images = remove_empty_images
+        self.split = config.split
+        self.name = f"{self.dataset_dirpath.name}-{config.split}"
+        self.classes_of_interest = config.classes_of_interest
+        self.include_crowd = config.include_crowd
+        self.drop_images_with_crowd = config.drop_images_with_crowd
+        self.remove_empty_images = config.remove_empty_images
         self.class_map: DetectionClassMap | None = None
 
     def set_class_map(self, class_map: DetectionClassMap) -> None:

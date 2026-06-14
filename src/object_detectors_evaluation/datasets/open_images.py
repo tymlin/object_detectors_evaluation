@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 
-from object_detectors_evaluation.datasets.types import DatasetSplit
+from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 
 from .base import (
     BaseDetectionDataset,
@@ -24,44 +24,29 @@ class OpenImagesDataset(BaseDetectionDataset):
     ``<dataset_dirpath>/<split>/metadata/classes.csv`` for class metadata.
     Open Images ``IsGroupOf`` annotations are treated as the dataset's crowd equivalent.
 
-    :param dataset_dirpath: Root directory of the downloaded Open Images dataset.
-    :param split: Dataset split to load.
+    :param config: Detection dataset configuration.
     :param transforms: Optional callable applied jointly to image and target by TorchVision.
     :param transform: Optional image-only transform passed to ``VisionDataset``.
     :param target_transform: Optional target-only transform passed to ``VisionDataset``.
-    :param classes_of_interest: Optional Open Images class names to keep.
-    :param include_crowd: Whether to keep Open Images ``IsGroupOf`` annotations.
-    :param drop_images_with_crowd: Whether to remove images that contain matching ``IsGroupOf`` annotations.
-    :param remove_empty_images: Whether to remove images with no remaining annotations after filtering.
     """
 
     def __init__(
         self,
-        dataset_dirpath: str | Path,
-        split: DatasetSplit,
+        config: DetectionDatasetConfig,
         transforms: Callable | None = None,
         transform: Callable | None = None,
         target_transform: Callable | None = None,
-        classes_of_interest: list[str] | None = None,
-        include_crowd: bool = True,
-        drop_images_with_crowd: bool = False,
-        remove_empty_images: bool = False,
     ) -> None:
         super().__init__(
-            dataset_dirpath=dataset_dirpath,
-            split=split,
+            config=config,
             transforms=transforms,
             transform=transform,
             target_transform=target_transform,
-            classes_of_interest=classes_of_interest,
-            include_crowd=include_crowd,
-            drop_images_with_crowd=drop_images_with_crowd,
-            remove_empty_images=remove_empty_images,
         )
 
-        self.images_dirpath = self.dataset_dirpath / split / "data"
-        self.annotations_filepath = self.dataset_dirpath / split / "labels" / "detections.csv"
-        self.classes_filepath = self.dataset_dirpath / split / "metadata" / "classes.csv"
+        self.images_dirpath = self.dataset_dirpath / self.split / "data"
+        self.annotations_filepath = self.dataset_dirpath / self.split / "labels" / "detections.csv"
+        self.classes_filepath = self.dataset_dirpath / self.split / "metadata" / "classes.csv"
         self.info_filepath = self.dataset_dirpath / "info.json"
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 

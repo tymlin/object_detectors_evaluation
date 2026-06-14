@@ -72,7 +72,7 @@ class ModelSpec:
 
 
 @dataclass(frozen=True, slots=True)
-class DownloadedModel:
+class ModelArtifact:
     """Local model artifact produced by a downloader.
 
     :param spec: Source model spec.
@@ -83,3 +83,6 @@ class DownloadedModel:
     spec: ModelSpec
     dirpath: Path
     filepaths: tuple[Path, ...]
+
+
+DownloadedModel = ModelArtifact

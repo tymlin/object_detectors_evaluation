@@ -8,7 +8,7 @@ from ultralytics import YOLO
 from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch, ImageId
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
-from object_detectors_evaluation.models import DownloadedModel
+from object_detectors_evaluation.models import ModelArtifact
 
 
 class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
@@ -19,10 +19,10 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
 
     def __init__(
         self,
-        downloaded_model: DownloadedModel,
+        model_artifact: ModelArtifact,
         config: DetectionInferenceConfig | None = None,
     ) -> None:
-        super().__init__(downloaded_model=downloaded_model, config=config)
+        super().__init__(model_artifact=model_artifact, config=config)
 
         self.predict_kwargs: dict[str, Any] = {
             "batch": self.config.batch_size,
