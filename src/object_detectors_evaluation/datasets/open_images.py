@@ -49,6 +49,9 @@ class OpenImagesDataset(BaseDetectionDataset):
         self.annotations_filepath = self.dataset_dirpath / self.split / "labels" / "detections.csv"
         self.classes_filepath = self.dataset_dirpath / self.split / "metadata" / "classes.csv"
         self.info_filepath = self.dataset_dirpath / "info.json"
+        self._require_dirpath(dirpath=self.images_dirpath, description="Open Images images")
+        self._require_filepath(filepath=self.annotations_filepath, description="Open Images annotations")
+        self._require_filepath(filepath=self.classes_filepath, description="Open Images classes")
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 
         self.info = self._load_optional_json(self.info_filepath)

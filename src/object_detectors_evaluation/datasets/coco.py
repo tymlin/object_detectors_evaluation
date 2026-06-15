@@ -46,6 +46,8 @@ class COCODataset(BaseDetectionDataset):
         self.images_dirpath = self.dataset_dirpath / self.split / "data"
         self.annotations_filepath = self.dataset_dirpath / self.split / "labels.json"
         self.info_filepath = self.dataset_dirpath / "info.json"
+        self._require_dirpath(dirpath=self.images_dirpath, description="COCO images")
+        self._require_filepath(filepath=self.annotations_filepath, description="COCO annotations")
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 
         self.info = self._load_optional_json(self.info_filepath)

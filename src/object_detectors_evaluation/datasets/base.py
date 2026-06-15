@@ -295,6 +295,24 @@ class BaseDetectionDataset(VisionDataset):
         return np.zeros((0, 4), dtype=np.float32)
 
     @staticmethod
+    def _require_dirpath(dirpath: Path, description: str) -> None:
+        if dirpath.is_dir():
+            return
+
+        msg = f"Could not find {description} directory at path: '{dirpath}'"
+        logger.error(msg)
+        raise FileNotFoundError(msg)
+
+    @staticmethod
+    def _require_filepath(filepath: Path, description: str) -> None:
+        if filepath.is_file():
+            return
+
+        msg = f"Could not find {description} file at path: '{filepath}'"
+        logger.error(msg)
+        raise FileNotFoundError(msg)
+
+    @staticmethod
     def _image_filepaths(images_dirpath: Path) -> list[Path]:
         extensions = ("*.jpg", "*.jpeg", "*.png")
         filepaths: list[Path] = []
