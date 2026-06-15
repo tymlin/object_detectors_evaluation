@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from transformers import AutoImageProcessor, AutoModelForObjectDetection
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
+from object_detectors_evaluation.inference.engines.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
 from object_detectors_evaluation.inference.torch_utils import (
     resolve_torch_device,

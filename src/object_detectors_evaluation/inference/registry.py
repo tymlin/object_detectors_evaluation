@@ -1,6 +1,6 @@
 from typing import TypeAlias
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine
+from object_detectors_evaluation.inference.engines.base import BaseDetectionInferenceEngine
 from object_detectors_evaluation.inference.engines.transformers import TransformersDetectionInferenceEngine
 from object_detectors_evaluation.inference.engines.ultralytics import UltralyticsDetectionInferenceEngine
 from object_detectors_evaluation.loggers import logger

@@ -1,5 +1,5 @@
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
+from object_detectors_evaluation.inference.engines.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.predictions import (
     DetectionLatency,
     DetectionPrediction,

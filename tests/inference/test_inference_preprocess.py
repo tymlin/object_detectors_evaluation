@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import torch
 
-from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
+from object_detectors_evaluation.inference.engines.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.engines.ultralytics import UltralyticsDetectionInferenceEngine
 from object_detectors_evaluation.inference.predictions import DetectionPredictionBatch
 
