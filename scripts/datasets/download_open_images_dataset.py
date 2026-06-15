@@ -1,11 +1,13 @@
+from typing import Sequence
+
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
 from object_detectors_evaluation.datasets import DatasetSplit
 from object_detectors_evaluation.datasets.fiftyone import download_open_images_dataset
 from object_detectors_evaluation.loggers import logger
 
 SPLIT: DatasetSplit = "test"
-CLASSES_OF_INTEREST = ["Person"]
-# CLASSES_OF_INTEREST = ["Person", "Human body", "Man", "Woman"]
+CLASSES_OF_INTEREST: Sequence[str] | None = ["Person"]
+# CLASSES_OF_INTEREST: Sequence[str] | None = ["Person", "Human body", "Man", "Woman"]
 MAX_SAMPLES: int | None = 5
 
 

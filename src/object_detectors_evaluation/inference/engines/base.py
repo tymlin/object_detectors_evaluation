@@ -59,10 +59,7 @@ class BaseDetectionInferenceEngine(ABC):
         self.config = config or DetectionInferenceConfig()
         logger.info(
             f"Initializing inference engine `{self.engine_name}` for model `{model_artifact.spec.name}` "
-            f"from path: '{model_artifact.dirpath}'"
-        )
-        logger.info(
-            f"Initializing inference engine `{self.engine_name}` with config: {self.config.model_dump_json(indent=4)}"
+            f"from path: '{model_artifact.dirpath}' with config: {self.config.model_dump_json(indent=4)}"
         )
         self.model = self.load_model()
         logger.info(

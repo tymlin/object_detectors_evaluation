@@ -1,0 +1,34 @@
+dataset:
+    name: coco
+    auto_download: false
+    config:
+        dataset_dirpath: datasets/fiftyone/coco-2017
+        split: validation
+        classes_of_interest: null
+        include_crowd: true
+        drop_images_with_crowd: false
+        remove_empty_images: false
+
+models:
+    - name: yolov8n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+
+evaluation:
+    batch_size: 1
+    warmup_iterations: 3
+    metrics:
+        backend: pycocotools
+        extended_summary: true
+        class_metrics: true
+
+outputs:
+    save_predictions: false
+    save_plots: true
+    num_plot_samples: 10
+    plot_score_threshold: null

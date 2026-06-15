@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from object_detectors_evaluation.consts import ROOT
 from object_detectors_evaluation.datasets.types import DatasetSplit
 
 
@@ -36,3 +37,15 @@ class DetectionDatasetConfig(BaseModel):
         default=False,
         description="Whether to remove images with no remaining annotations after filtering.",
     )
+
+    @field_validator("dataset_dirpath", mode="after")
+    @classmethod
+    def resolve_dataset_dirpath(cls, value: Path) -> Path:
+        """Resolve relative dataset paths from the project root.
+
+        :param value: Dataset directory path.
+        :return: Absolute dataset directory path.
+        """
+        if value.is_absolute():
+            return value
+        return ROOT / value
