@@ -16,9 +16,8 @@ from torch import Tensor
 from torchvision.datasets.vision import VisionDataset
 
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
+from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
-
-DetectionTarget = dict[str, Any]
 
 
 def detection_collate_fn(batch: list[tuple[Any, DetectionTarget]]) -> tuple[list[Any], list[DetectionTarget]]:

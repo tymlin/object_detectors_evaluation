@@ -8,12 +8,12 @@ import numpy as np
 from PIL import Image
 
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
+from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
 
 from .base import (
     BaseDetectionDataset,
     DetectionClassMap,
-    DetectionTarget,
 )
 
 

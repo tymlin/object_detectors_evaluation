@@ -1,13 +1,12 @@
 from .base import (
     BaseDetectionDataset,
     DetectionClassMap,
-    DetectionTarget,
     detection_collate_fn,
 )
 from .coco import COCODataset
 from .configs import DetectionDatasetConfig
 from .open_images import OpenImagesDataset
-from .types import DatasetName, DatasetSplit
+from .types import DatasetName, DatasetSplit, DetectionTarget
 
 __all__ = [
     "BaseDetectionDataset",

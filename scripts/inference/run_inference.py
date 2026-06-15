@@ -1,6 +1,8 @@
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.figure import Figure
 
-from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH, MODELS_DIRPATH
+from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH, MODELS_DIRPATH, RESULTS_DIRPATH
 from object_detectors_evaluation.datasets import (
     BaseDetectionDataset,
     COCODataset,
@@ -13,6 +15,7 @@ from object_detectors_evaluation.inference import DetectionInferenceConfig, reso
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models.downloaders import download_model
 from object_detectors_evaluation.models.registry import get_detection_model_spec
+from object_detectors_evaluation.visualization import plot_prediction, plot_target_prediction
 
 DATASET_NAME: DatasetName = "coco"
 SPLIT: DatasetSplit = "validation"
@@ -30,6 +33,12 @@ MAX_DETECTIONS: int | None = None
 DTYPE: str | None = None
 OVERWRITE_MODEL = False
 TOP_K_LOGGED_PREDICTIONS = 10
+
+PLOT_PREDICTION = True
+PLOT_TARGET_PREDICTION = True
+SHOW_FIGURES = True
+SAVE_FIGURES = True
+FIGURES_DIRPATH = RESULTS_DIRPATH / "inference_figures"
 
 
 def create_dataset() -> BaseDetectionDataset:
@@ -110,7 +119,7 @@ def main() -> None:
     if prediction_batch.latency is not None:
         latency = prediction_batch.latency
         logger.info(
-            f"Latency for model {model_spec.name}`: \n"
+            f"Latency for model `{model_spec.name}`: \n"
             f"\tpreprocess {latency.preprocess_ms:.2f} ms, \n"
             f"\tinference {latency.inference_ms:.2f} ms, \n"
             f"\tpostprocess {latency.postprocess_ms:.2f} ms, \n"
@@ -123,6 +132,41 @@ def main() -> None:
             f"Prediction {idx}: label `{prediction.labels[idx]}`, name `{label_name}`, "
             f"score `{prediction.scores[idx]:.4f}`, box `{prediction.boxes[idx].tolist()}`"
         )
+
+    if PLOT_PREDICTION:
+        fig = plot_prediction(
+            image=image_array,
+            prediction=prediction,
+            score_threshold=SCORE_THRESHOLD,
+        )
+        _handle_figure(fig=fig, filename=f"{MODEL_NAME}_{DATASET_NAME}_{image_id}_prediction.png")
+
+    if PLOT_TARGET_PREDICTION:
+        fig = plot_target_prediction(
+            image=image_array,
+            target=target,
+            prediction=prediction,
+            score_threshold=SCORE_THRESHOLD,
+        )
+        _handle_figure(fig=fig, filename=f"{MODEL_NAME}_{DATASET_NAME}_{image_id}_target_prediction.png")
+
+    plt.close("all")
+
+
+def _handle_figure(fig: Figure, filename: str) -> None:
+    """Show or save a visualization figure according to script settings.
+
+    :param fig: Matplotlib figure.
+    :param filename: Output filename used when ``SAVE_FIGURES`` is enabled.
+    """
+    if SAVE_FIGURES:
+        FIGURES_DIRPATH.mkdir(parents=True, exist_ok=True)
+        filepath = FIGURES_DIRPATH / filename
+        logger.info(f"Saving inference figure to path: '{filepath}'")
+        fig.savefig(filepath, bbox_inches="tight")
+
+    if SHOW_FIGURES:
+        fig.show()
 
 
 if __name__ == "__main__":
