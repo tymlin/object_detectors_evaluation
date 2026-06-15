@@ -113,6 +113,7 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
     """Runtime configuration for the evaluator loop.
 
     :param batch_size: Number of dataset samples to evaluate per engine call.
+    :param num_samples: Optional number of dataset samples to evaluate. ``None`` means all samples.
     :param warmup_iterations: Number of warmup engine calls before measuring a model.
     """
 
@@ -122,6 +123,11 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
         default=1,
         ge=1,
         description="Number of dataset samples to evaluate per engine call.",
+    )
+    num_samples: int | None = Field(
+        default=None,
+        ge=1,
+        description="Optional number of dataset samples to evaluate. `None` means all samples.",
     )
     warmup_iterations: int = Field(
         default=3,

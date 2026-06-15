@@ -21,6 +21,7 @@ models:
 
 evaluation:
     batch_size: 1
+    num_samples: null
     warmup_iterations: 3
     metrics:
         backend: pycocotools

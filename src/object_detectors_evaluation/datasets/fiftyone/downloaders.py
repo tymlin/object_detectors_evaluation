@@ -7,11 +7,56 @@ import fiftyone as fo
 import fiftyone.zoo as foz
 
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
-from object_detectors_evaluation.datasets.types import DatasetSplit
+from object_detectors_evaluation.datasets.types import DatasetName, DatasetSplit
 from object_detectors_evaluation.loggers import logger
 
 COCO_2017_DATASET_NAME = "coco-2017"
 OPEN_IMAGES_V7_DATASET_NAME = "open-images-v7"
+
+
+def download_dataset(
+    dataset_name: DatasetName,
+    dataset_dirpath: str | Path | None = FIFTYONE_DATASETS_DIRPATH,
+    split: DatasetSplit = "validation",
+    classes: Sequence[str] | None = None,
+    max_samples: int | None = None,
+    label_types: Sequence[str] = ("detections",),
+    **kwargs: Any,
+) -> Any:
+    """Download a detection dataset by project dataset name.
+
+    :param dataset_name: Project dataset name.
+    :param dataset_dirpath: Optional FiftyOne dataset storage directory.
+    :param split: Dataset split to download.
+    :param classes: Optional class names to download.
+    :param max_samples: Optional maximum number of samples.
+    :param label_types: FiftyOne label types to download.
+    :param kwargs: Additional arguments forwarded to FiftyOne.
+    :return: Result returned by ``fiftyone.zoo.download_zoo_dataset``.
+    """
+    if dataset_name == "coco":
+        return download_coco_dataset(
+            dataset_dirpath=dataset_dirpath,
+            split=split,
+            classes=classes,
+            max_samples=max_samples,
+            label_types=label_types,
+            **kwargs,
+        )
+
+    if dataset_name == "open_images":
+        return download_open_images_dataset(
+            dataset_dirpath=dataset_dirpath,
+            split=split,
+            classes=classes,
+            max_samples=max_samples,
+            label_types=label_types,
+            **kwargs,
+        )
+
+    msg = f"Unsupported dataset `{dataset_name}`"
+    logger.error(msg)
+    raise ValueError(msg)
 
 
 def configure_fiftyone_dataset_dir(dataset_dirpath: str | Path) -> Path:

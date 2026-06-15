@@ -9,7 +9,7 @@ from PIL import Image
 
 from object_detectors_evaluation.consts import MODELS_DIRPATH, NOW, RUNS_DIRPATH
 from object_detectors_evaluation.datasets import BaseDetectionDataset, COCODataset, OpenImagesDataset
-from object_detectors_evaluation.datasets.fiftyone import download_coco_dataset, download_open_images_dataset
+from object_detectors_evaluation.datasets.fiftyone import download_dataset
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.evaluation.configs import DetectionEvaluatorConfig, DetectionEvaluatorModelConfig
 from object_detectors_evaluation.evaluation.metrics import DetectionMeanAveragePrecision, to_jsonable
@@ -74,22 +74,23 @@ class DetectionEvaluator:
         """
         self._save_run_config()
         dataset = self._create_dataset()
+        num_samples = self._resolve_num_samples(dataset=dataset)
         model_results = []
 
         for model_config in self.config.models:
-            model_results.append(
-                self._evaluate_model(
-                    model_config=model_config,
-                    dataset=dataset,
-                )
+            model_result = self._evaluate_model(
+                model_config=model_config,
+                dataset=dataset,
+                num_samples=num_samples,
             )
+            model_results.append(model_result)
 
         result = DetectionEvaluationRunResult(
             run_name=self.run_name,
             run_dirpath=str(self.run_dirpath),
             dataset_name=self.config.dataset.name,
             dataset_split=self.dataset_config.split,
-            num_samples=len(dataset),
+            num_samples=num_samples,
             models=tuple(model_results),
         )
         save_json(filepath=self.run_dirpath / "summary.json", data=result.model_dump(mode="json"))
@@ -98,7 +99,12 @@ class DetectionEvaluator:
 
     def _create_dataset(self) -> BaseDetectionDataset:
         if self.config.dataset.auto_download:
-            self._download_dataset()
+            download_dataset(
+                dataset_name=self.config.dataset.name,
+                dataset_dirpath=self.dataset_config.dataset_dirpath.parent,
+                split=self.dataset_config.split,
+                classes=self.dataset_config.classes_of_interest,
+            )
 
         logger.info(f"Creating evaluation dataset `{self.config.dataset.name}`")
         if self.config.dataset.name == "coco":
@@ -111,32 +117,11 @@ class DetectionEvaluator:
         logger.error(msg)
         raise ValueError(msg)
 
-    def _download_dataset(self) -> None:
-        dataset_root_dirpath = self.dataset_config.dataset_dirpath.parent
-        if self.config.dataset.name == "coco":
-            download_coco_dataset(
-                dataset_dirpath=dataset_root_dirpath,
-                split=self.dataset_config.split,
-                classes=self.dataset_config.classes_of_interest,
-            )
-            return
-
-        if self.config.dataset.name == "open_images":
-            download_open_images_dataset(
-                dataset_dirpath=dataset_root_dirpath,
-                split=self.dataset_config.split,
-                classes=self.dataset_config.classes_of_interest,
-            )
-            return
-
-        msg = f"Unsupported evaluation dataset download for `{self.config.dataset.name}`"
-        logger.error(msg)
-        raise ValueError(msg)
-
     def _evaluate_model(
         self,
         model_config: DetectionEvaluatorModelConfig,
         dataset: BaseDetectionDataset,
+        num_samples: int,
     ) -> DetectionEvaluationModelResult:
         model_spec = get_detection_model_spec(model_config.name)
         self._validate_class_space(model_class_space=model_spec.class_space)
@@ -159,7 +144,7 @@ class DetectionEvaluator:
         predictions_filepath = model_dirpath / "predictions.jsonl"
         num_plotted_samples = 0
 
-        for batch_index, batch in enumerate(self._iter_batches(dataset=dataset)):
+        for batch_index, batch in enumerate(self._iter_batches(dataset=dataset, num_samples=num_samples)):
             images, targets = batch
             image_ids = [target["image_id"] for target in targets]
             prepared_images = [self._prepare_image(image=image) for image in images]
@@ -191,7 +176,7 @@ class DetectionEvaluator:
             engine_name=engine.engine_name,
             metrics=metrics,
             latency=latency_summary,
-            num_samples=len(dataset),
+            num_samples=num_samples,
             run_dirpath=str(model_dirpath),
         )
         logger.info(f"Finished evaluating model `{model_spec.name}`")
@@ -221,12 +206,32 @@ class DetectionEvaluator:
         for _ in range(self.config.evaluation.warmup_iterations):
             engine(images=[prepared_image], image_ids=[image_id])
 
-    def _iter_batches(self, dataset: BaseDetectionDataset) -> Iterator[tuple[list[object], list[DetectionTarget]]]:
+    def _iter_batches(
+        self,
+        dataset: BaseDetectionDataset,
+        num_samples: int,
+    ) -> Iterator[tuple[list[object], list[DetectionTarget]]]:
         batch_size = self.config.evaluation.batch_size
-        for start_index in range(0, len(dataset), batch_size):
-            batch_items = [dataset[index] for index in range(start_index, min(start_index + batch_size, len(dataset)))]
+        for start_index in range(0, num_samples, batch_size):
+            batch_items = [dataset[index] for index in range(start_index, min(start_index + batch_size, num_samples))]
             images, targets = zip(*batch_items)
             yield list(images), list(targets)
+
+    def _resolve_num_samples(self, dataset: BaseDetectionDataset) -> int:
+        available_num_samples = len(dataset)
+        requested_num_samples = self.config.evaluation.num_samples
+        if requested_num_samples is None:
+            return available_num_samples
+
+        if requested_num_samples <= available_num_samples:
+            return requested_num_samples
+
+        msg = (
+            f"Requested `{requested_num_samples}` evaluation samples, "
+            f"but dataset contains only `{available_num_samples}` samples"
+        )
+        logger.error(msg)
+        raise ValueError(msg)
 
     def _save_plots(
         self,
