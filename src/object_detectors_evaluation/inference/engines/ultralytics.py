@@ -8,7 +8,6 @@ from ultralytics import YOLO
 from object_detectors_evaluation.inference.base import BaseDetectionInferenceEngine, DetectionInputBatch
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
 from object_detectors_evaluation.inference.predictions import DetectionPrediction, DetectionPredictionBatch
-from object_detectors_evaluation.inference.torch_utils import synchronize_torch_device
 from object_detectors_evaluation.inference.types import ImageId, ImageInput
 from object_detectors_evaluation.models import ModelArtifact
 
@@ -111,10 +110,6 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         output = self.model.predict(source=preprocessed_batch.processed_inputs, **self.predict_kwargs)
         return output
-
-    def synchronize(self) -> None:
-        """Synchronize the torch runtime for accurate inference timing."""
-        synchronize_torch_device(device=self.device)
 
     def postprocess(self, preprocessed_batch: DetectionInputBatch, raw_outputs: Any) -> DetectionPredictionBatch:
         """Convert Ultralytics results to normalized predictions.

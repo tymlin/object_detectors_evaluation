@@ -14,6 +14,7 @@ from object_detectors_evaluation.inference.image_utils import (
     validate_image_input,
 )
 from object_detectors_evaluation.inference.predictions import DetectionLatency, DetectionPredictionBatch
+from object_detectors_evaluation.inference.torch_utils import synchronize_torch_device
 from object_detectors_evaluation.inference.types import ImageId, ImageInput, ProcessedInputs
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import ModelArtifact
@@ -133,17 +134,17 @@ class BaseDetectionInferenceEngine(ABC):
         """
         preprocess_start_time = perf_counter()
         preprocessed_batch = self.preprocess(images=images, image_ids=image_ids)
-        preprocess_ms = self._elapsed_ms(start_time=preprocess_start_time)
+        preprocess_ms = (perf_counter() - preprocess_start_time) * 1000.0
 
         self.synchronize()
         inference_start_time = perf_counter()
         raw_outputs = self.predict(preprocessed_batch=preprocessed_batch)
         self.synchronize()
-        inference_ms = self._elapsed_ms(start_time=inference_start_time)
+        inference_ms = (perf_counter() - inference_start_time) * 1000.0
 
         postprocess_start_time = perf_counter()
         prediction_batch = self.postprocess(preprocessed_batch=preprocessed_batch, raw_outputs=raw_outputs)
-        postprocess_ms = self._elapsed_ms(start_time=postprocess_start_time)
+        postprocess_ms = (perf_counter() - postprocess_start_time) * 1000.0
 
         latency = DetectionLatency(
             preprocess_ms=preprocess_ms,
@@ -199,16 +200,7 @@ class BaseDetectionInferenceEngine(ABC):
 
         Engines with asynchronous device execution should override this method.
         """
-        return None
-
-    @staticmethod
-    def _elapsed_ms(start_time: float) -> float:
-        """Return elapsed milliseconds from a ``perf_counter`` start time.
-
-        :param start_time: Start time from ``perf_counter``.
-        :return: Elapsed milliseconds.
-        """
-        return (perf_counter() - start_time) * 1000
+        synchronize_torch_device(device=self.device)
 
     def normalize_image_ids(
         self,

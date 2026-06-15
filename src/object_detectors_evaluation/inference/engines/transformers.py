@@ -11,7 +11,6 @@ from object_detectors_evaluation.inference.predictions import DetectionPredictio
 from object_detectors_evaluation.inference.torch_utils import (
     resolve_torch_device,
     resolve_torch_dtype,
-    synchronize_torch_device,
 )
 from object_detectors_evaluation.inference.types import ImageId, ImageInput
 from object_detectors_evaluation.models import ModelArtifact
@@ -29,8 +28,8 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         config: DetectionInferenceConfig | None = None,
     ) -> None:
         engine_config = config or DetectionInferenceConfig()
-        self.torch_device = resolve_torch_device(device=engine_config.device)
-        self.torch_dtype = resolve_torch_dtype(dtype=engine_config.dtype)
+        self.resolved_device = resolve_torch_device(device=engine_config.device)
+        self.resolved_dtype = resolve_torch_dtype(dtype=engine_config.dtype)
         self.max_detections = engine_config.max_detections
 
         super().__init__(model_artifact=model_artifact, config=engine_config)
@@ -42,10 +41,10 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         self.processor = AutoImageProcessor.from_pretrained(self.model_artifact.dirpath)
         model = AutoModelForObjectDetection.from_pretrained(self.model_artifact.dirpath)
-        model = model.to(self.torch_device)
+        model = model.to(self.resolved_device)
 
-        if self.torch_dtype is not None:
-            model = model.to(dtype=self.torch_dtype)
+        if self.resolved_dtype is not None:
+            model = model.to(dtype=self.resolved_dtype)
 
         model.eval()
         return model
@@ -74,7 +73,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         """
         input_batch = super().preprocess(images=images, image_ids=image_ids)
         inputs = self.processor(images=input_batch.processed_inputs, return_tensors="pt")
-        inputs = {name: value.to(self.torch_device) for name, value in inputs.items()}
+        inputs = {name: value.to(self.resolved_device) for name, value in inputs.items()}
         return DetectionInputBatch(
             processed_inputs=inputs,
             image_ids=input_batch.image_ids,
@@ -94,10 +93,6 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
 
         return output
 
-    def synchronize(self) -> None:
-        """Synchronize the torch runtime for accurate inference timing."""
-        synchronize_torch_device(device=self.torch_device)
-
     def postprocess(self, preprocessed_batch: DetectionInputBatch, raw_outputs: Any) -> DetectionPredictionBatch:
         """Convert Transformers outputs to normalized predictions.
 
@@ -105,7 +100,7 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         :param raw_outputs: Raw Transformers outputs.
         :return: Normalized detection predictions.
         """
-        target_sizes = torch.tensor(preprocessed_batch.image_sizes, device=self.torch_device)
+        target_sizes = torch.tensor(preprocessed_batch.image_sizes, device=self.resolved_device)
         results = self.processor.post_process_object_detection(
             outputs=raw_outputs,
             threshold=self.config.score_threshold,
