@@ -10,6 +10,7 @@ from PIL import Image
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
+from object_detectors_evaluation.utils.files import load_json, require_dirpath, require_filepath
 
 from .base import (
     BaseDetectionDataset,
@@ -46,12 +47,12 @@ class COCODataset(BaseDetectionDataset):
         self.images_dirpath = self.dataset_dirpath / self.split / "data"
         self.annotations_filepath = self.dataset_dirpath / self.split / "labels.json"
         self.info_filepath = self.dataset_dirpath / "info.json"
-        self._require_dirpath(dirpath=self.images_dirpath, description="COCO images")
-        self._require_filepath(filepath=self.annotations_filepath, description="COCO annotations")
+        require_dirpath(dirpath=self.images_dirpath, description="COCO images")
+        require_filepath(filepath=self.annotations_filepath, description="COCO annotations")
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 
-        self.info = self._load_optional_json(self.info_filepath)
-        self.coco_data = self._load_json(self.annotations_filepath)
+        self.info = load_json(self.info_filepath) if self.info_filepath.exists() else {}
+        self.coco_data = load_json(self.annotations_filepath)
         self.categories = self.coco_data.get("categories", [])
         self.images_info = self.coco_data.get("images", [])
         self.annotations_data = self.coco_data.get("annotations", [])

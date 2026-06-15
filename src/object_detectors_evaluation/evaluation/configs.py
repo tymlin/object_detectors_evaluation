@@ -1,12 +1,12 @@
 from pathlib import Path
 
-import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.datasets.types import DatasetName
 from object_detectors_evaluation.evaluation.types import MeanAveragePrecisionBackend
 from object_detectors_evaluation.inference.configs import DetectionInferenceConfig
+from object_detectors_evaluation.utils.files import load_yaml
 
 
 class DetectionEvaluatorDatasetConfig(BaseModel):
@@ -166,7 +166,5 @@ class DetectionEvaluatorConfig(BaseModel):
         :param filepath: YAML config filepath.
         :return: Parsed evaluator config.
         """
-        filepath = Path(filepath)
-        with filepath.open() as file:
-            data = yaml.safe_load(file)
+        data = load_yaml(filepath=filepath)
         return cls.model_validate(data)

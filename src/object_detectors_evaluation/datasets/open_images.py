@@ -10,6 +10,7 @@ from PIL import Image
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
+from object_detectors_evaluation.utils.files import load_json, require_dirpath, require_filepath
 
 from .base import (
     BaseDetectionDataset,
@@ -49,12 +50,12 @@ class OpenImagesDataset(BaseDetectionDataset):
         self.annotations_filepath = self.dataset_dirpath / self.split / "labels" / "detections.csv"
         self.classes_filepath = self.dataset_dirpath / self.split / "metadata" / "classes.csv"
         self.info_filepath = self.dataset_dirpath / "info.json"
-        self._require_dirpath(dirpath=self.images_dirpath, description="Open Images images")
-        self._require_filepath(filepath=self.annotations_filepath, description="Open Images annotations")
-        self._require_filepath(filepath=self.classes_filepath, description="Open Images classes")
+        require_dirpath(dirpath=self.images_dirpath, description="Open Images images")
+        require_filepath(filepath=self.annotations_filepath, description="Open Images annotations")
+        require_filepath(filepath=self.classes_filepath, description="Open Images classes")
         self.images_filepaths = self._image_filepaths(self.images_dirpath)
 
-        self.info = self._load_optional_json(self.info_filepath)
+        self.info = load_json(self.info_filepath) if self.info_filepath.exists() else {}
         self.classes = pd.read_csv(self.classes_filepath, header=None, names=["source_id", "name"])
         self.annotations = pd.read_csv(self.annotations_filepath)
 

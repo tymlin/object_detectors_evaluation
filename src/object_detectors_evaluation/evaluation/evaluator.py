@@ -1,11 +1,9 @@
-import json
 from collections.abc import Iterator
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import yaml
 from natsort import natsorted
 from PIL import Image
 
@@ -28,6 +26,7 @@ from object_detectors_evaluation.loggers import configure_logger, logger
 from object_detectors_evaluation.models import ModelArtifact, ModelSpec
 from object_detectors_evaluation.models.downloaders import build_downloaded_model, download_model, get_model_dirpath
 from object_detectors_evaluation.models.registry import get_detection_model_spec
+from object_detectors_evaluation.utils.files import append_jsonl, require_dirpath, save_json, save_yaml
 from object_detectors_evaluation.visualization import plot_prediction, plot_target_prediction
 
 
@@ -93,7 +92,7 @@ class DetectionEvaluator:
             num_samples=len(dataset),
             models=tuple(model_results),
         )
-        self._save_json(filepath=self.run_dirpath / "summary.json", data=result.model_dump(mode="json"))
+        save_json(filepath=self.run_dirpath / "summary.json", data=result.model_dump(mode="json"))
         logger.info(f"Finished detection evaluator run `{self.run_name}` at path: '{self.run_dirpath}'")
         return result
 
@@ -184,8 +183,8 @@ class DetectionEvaluator:
 
         metrics = metric.compute()
         latency_summary = self._summarize_latencies(latencies=latencies)
-        self._save_json(filepath=model_dirpath / "metrics.json", data=metrics)
-        self._save_json(filepath=model_dirpath / "latency.json", data=latency_summary.model_dump(mode="json"))
+        save_json(filepath=model_dirpath / "metrics.json", data=metrics)
+        save_json(filepath=model_dirpath / "latency.json", data=latency_summary.model_dump(mode="json"))
 
         result = DetectionEvaluationModelResult(
             model_name=model_spec.name,
@@ -206,10 +205,7 @@ class DetectionEvaluator:
             )
 
         model_dirpath = get_model_dirpath(spec=model_spec, models_dirpath=MODELS_DIRPATH)
-        if not model_dirpath.is_dir():
-            msg = f"Could not find local model directory for `{model_spec.name}` at path: '{model_dirpath}'"
-            logger.error(msg)
-            raise FileNotFoundError(msg)
+        require_dirpath(dirpath=model_dirpath, description=f"local model `{model_spec.name}`")
 
         filepaths = tuple(natsorted(model_dirpath.rglob("*")))
         filepaths = tuple(filepath for filepath in filepaths if filepath.is_file())
@@ -295,19 +291,19 @@ class DetectionEvaluator:
         raise ValueError(msg)
 
     def _save_run_config(self) -> None:
-        with (self.run_dirpath / "config.yaml").open("w") as file:
-            yaml.safe_dump(self.config.model_dump(mode="json"), file, sort_keys=False)
+        save_yaml(filepath=self.run_dirpath / "config.yaml", data=self.config.model_dump(mode="json"))
 
         resolved_config = self.config.model_dump(mode="json")
         resolved_config["run_name"] = self.run_name
         resolved_config["run_dirpath"] = str(self.run_dirpath)
         resolved_config["dataset"]["config"]["dataset_dirpath"] = str(self.dataset_config.dataset_dirpath)
-        self._save_json(filepath=self.run_dirpath / "resolved_config.json", data=resolved_config)
+        save_json(filepath=self.run_dirpath / "resolved_config.json", data=resolved_config)
 
     def _append_predictions(self, filepath: Path, predictions: list[DetectionPrediction]) -> None:
-        with filepath.open("a") as file:
-            for prediction in predictions:
-                file.write(json.dumps(to_jsonable(value=prediction.model_dump(mode="python"))) + "\n")
+        append_jsonl(
+            filepath=filepath,
+            records=[to_jsonable(value=prediction.model_dump(mode="python")) for prediction in predictions],
+        )
 
     @staticmethod
     def _prepare_image(image: object) -> ImageInput:
@@ -344,9 +340,3 @@ class DetectionEvaluator:
             total_mean_ms=total_mean_ms,
             num_batches=len(latencies),
         )
-
-    @staticmethod
-    def _save_json(filepath: Path, data: object) -> None:
-        logger.info(f"Saving JSON file to path: '{filepath}'")
-        with filepath.open("w") as file:
-            json.dump(data, file, indent=4)

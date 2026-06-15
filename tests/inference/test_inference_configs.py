@@ -5,6 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from object_detectors_evaluation.inference import DetectionInferenceConfig
+from object_detectors_evaluation.utils.files import load_yaml
 
 
 def test_detection_inference_config_defaults() -> None:
@@ -54,7 +55,6 @@ def test_detection_inference_config_rejects_extra_fields() -> None:
 
 
 def test_detection_inference_config_loads_from_yaml_file(tmp_path: Path) -> None:
-    yaml = pytest.importorskip("yaml")
     config_filepath = tmp_path / "inference.yaml"
     config_filepath.write_text(
         "\n".join(
@@ -67,7 +67,7 @@ def test_detection_inference_config_loads_from_yaml_file(tmp_path: Path) -> None
         )
     )
 
-    config_data = yaml.safe_load(config_filepath.read_text())
+    config_data = load_yaml(config_filepath)
     config = DetectionInferenceConfig.model_validate(config_data)
 
     assert config.device == "cpu"

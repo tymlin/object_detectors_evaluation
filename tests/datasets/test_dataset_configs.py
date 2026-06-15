@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from object_detectors_evaluation.datasets import DetectionDatasetConfig
+from object_detectors_evaluation.utils.files import load_yaml
 
 
 def test_detection_dataset_config_accepts_required_fields(tmp_path: Path) -> None:
@@ -58,7 +59,6 @@ def test_detection_dataset_config_rejects_extra_fields(tmp_path: Path) -> None:
 
 
 def test_detection_dataset_config_loads_from_yaml_file(tmp_path: Path) -> None:
-    yaml = pytest.importorskip("yaml")
     config_filepath = tmp_path / "dataset.yaml"
     dataset_dirpath = tmp_path / "coco-2017"
     config_filepath.write_text(
@@ -75,7 +75,7 @@ def test_detection_dataset_config_loads_from_yaml_file(tmp_path: Path) -> None:
         )
     )
 
-    config_data = yaml.safe_load(config_filepath.read_text())
+    config_data = load_yaml(config_filepath)
     config = DetectionDatasetConfig.model_validate(config_data)
 
     assert config.dataset_dirpath == dataset_dirpath
