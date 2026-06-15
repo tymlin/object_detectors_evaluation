@@ -107,6 +107,16 @@ def main() -> None:
         f"Model `{model_spec.name}` predicted {prediction.num_predictions} objects "
         f"for image id `{prediction.image_id}`"
     )
+    if prediction_batch.latency is not None:
+        latency = prediction_batch.latency
+        logger.info(
+            f"Latency for model {model_spec.name}`: \n"
+            f"\tpreprocess {latency.preprocess_ms:.2f} ms, \n"
+            f"\tinference {latency.inference_ms:.2f} ms, \n"
+            f"\tpostprocess {latency.postprocess_ms:.2f} ms, \n"
+            f"\ttotal {latency.total_ms:.2f} ms"
+        )
+
     for idx in range(min(TOP_K_LOGGED_PREDICTIONS, prediction.num_predictions)):
         label_name = None if prediction.labels_names is None else prediction.labels_names[idx]
         logger.info(

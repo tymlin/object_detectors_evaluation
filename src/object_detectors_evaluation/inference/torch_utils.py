@@ -41,3 +41,16 @@ def resolve_torch_dtype(dtype: str | None) -> torch.dtype | None:
         raise ValueError(msg)
 
     return dtype_by_name[dtype]
+
+
+def synchronize_torch_device(device: torch.device) -> None:
+    """Synchronize a torch device when the backend executes asynchronously.
+
+    :param device: Torch device to synchronize.
+    """
+    if device.type == "cuda" and torch.cuda.is_available():
+        torch.cuda.synchronize(device=device)
+        return
+
+    if device.type == "mps" and hasattr(torch, "mps") and hasattr(torch.mps, "synchronize"):
+        torch.mps.synchronize()

@@ -68,6 +68,11 @@ class COCODataset(BaseDetectionDataset):
         self.image_id_to_annotations = self._annotations_by_image_id(self.annotations_data)
         self.source_id_filter = self._source_id_filter()
         self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
+        logger.info(
+            f"Initialized dataset `{self.__class__.__name__}` with `{len(self)}` images, "
+            f"`{self.num_classes}` classes, `{len(self.annotations_data)}` annotations, "
+            f"images path: '{self.images_dirpath}', annotations path: '{self.annotations_filepath}'"
+        )
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
         """Load a COCO sample before TorchVision transforms are applied.

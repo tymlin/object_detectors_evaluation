@@ -19,10 +19,17 @@ def download_model(
     :param kwargs: Additional downloader-specific keyword arguments.
     :return: Downloaded model metadata.
     """
+    logger.info(
+        f"Starting model download for `{spec.name}` with source type `{spec.source_type}` "
+        f"to models path: '{Path(models_dirpath)}'"
+    )
     if spec.source_type == "huggingface":
-        return download_huggingface_model(spec=spec, models_dirpath=models_dirpath, **kwargs)
+        model_artifact = download_huggingface_model(spec=spec, models_dirpath=models_dirpath, **kwargs)
+        return model_artifact
+
     if spec.source_type == "url":
-        return download_url_model(spec=spec, models_dirpath=models_dirpath, **kwargs)
+        model_artifact = download_url_model(spec=spec, models_dirpath=models_dirpath, **kwargs)
+        return model_artifact
 
     msg = f"Model source type `{spec.source_type}` is not supported by download_model"
     logger.error(msg)

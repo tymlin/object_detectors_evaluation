@@ -116,6 +116,7 @@ class BaseDetectionDataset(VisionDataset):
     ) -> None:
         self.config = config
         self.dataset_dirpath = config.dataset_dirpath
+        logger.info(f"Initializing dataset `{self.__class__.__name__}` with config: {config.model_dump_json(indent=4)}")
         super().__init__(
             root=str(self.dataset_dirpath),
             transforms=transforms,

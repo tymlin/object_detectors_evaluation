@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from object_detectors_evaluation.consts import MODELS_DIRPATH
+from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import DownloadedModel, ModelSpec
 
 
@@ -22,4 +23,5 @@ def build_downloaded_model(spec: ModelSpec, dirpath: Path, filepaths: tuple[Path
     :param filepaths: Local model files.
     :return: Downloaded model metadata.
     """
+    logger.info(f"Built model artifact for `{spec.name}` with `{len(filepaths)}` files at path: '{dirpath}'")
     return DownloadedModel(spec=spec, dirpath=dirpath, filepaths=filepaths)

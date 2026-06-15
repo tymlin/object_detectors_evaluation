@@ -84,6 +84,19 @@ def test_base_preprocess_rejects_mismatched_image_ids() -> None:
         engine.preprocess(images=[image], image_ids=["image-1", "image-2"])
 
 
+def test_base_call_attaches_latency_to_prediction_batch() -> None:
+    engine = object.__new__(FakeDetectionInferenceEngine)
+    image = np.zeros((10, 20, 3), dtype=np.uint8)
+
+    prediction_batch = engine(images=[image], image_ids=["image-1"])
+
+    assert prediction_batch.latency is not None
+    assert prediction_batch.latency.preprocess_ms >= 0
+    assert prediction_batch.latency.inference_ms >= 0
+    assert prediction_batch.latency.postprocess_ms >= 0
+    assert prediction_batch.latency.total_ms >= 0
+
+
 def test_ultralytics_preprocess_converts_numpy_rgb_to_bgr() -> None:
     engine = object.__new__(UltralyticsDetectionInferenceEngine)
     image = np.asarray([[[1, 2, 3], [4, 5, 6]]], dtype=np.uint8)

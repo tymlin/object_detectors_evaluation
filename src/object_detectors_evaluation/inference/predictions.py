@@ -7,6 +7,24 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from object_detectors_evaluation.loggers import logger
 
 
+class DetectionLatency(BaseModel):
+    """Latency measurements for one detection inference call."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    preprocess_ms: float = Field(ge=0, description="Input preprocessing latency in milliseconds.")
+    inference_ms: float = Field(ge=0, description="Backend model inference latency in milliseconds.")
+    postprocess_ms: float = Field(ge=0, description="Prediction postprocessing latency in milliseconds.")
+
+    @property
+    def total_ms(self) -> float:
+        """Return total measured latency in milliseconds.
+
+        :return: Sum of preprocess, inference, and postprocess latency.
+        """
+        return self.preprocess_ms + self.inference_ms + self.postprocess_ms
+
+
 class DetectionPrediction(BaseModel):
     """Normalized object detection prediction for a single image."""
 
@@ -30,10 +48,6 @@ class DetectionPrediction(BaseModel):
     class_space: str | None = Field(
         default=None,
         description="Optional class space produced by the model, such as `coco`.",
-    )
-    metadata: dict[str, Any] = Field(
-        default_factory=dict,
-        description="Optional backend-specific metadata for debugging.",
     )
 
     @field_validator("boxes", mode="before")
@@ -119,6 +133,10 @@ class DetectionPredictionBatch(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True, extra="forbid")
 
     predictions: tuple[DetectionPrediction, ...] = Field(description="Per-image detection predictions.")
+    latency: DetectionLatency | None = Field(
+        default=None,
+        description="Optional latency measurements for the inference call that produced this batch.",
+    )
 
     def __len__(self) -> int:
         """Return the number of images in the prediction batch.

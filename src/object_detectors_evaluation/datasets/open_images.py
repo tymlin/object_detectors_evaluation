@@ -8,6 +8,7 @@ import pandas as pd
 from PIL import Image
 
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
+from object_detectors_evaluation.loggers import logger
 
 from .base import (
     BaseDetectionDataset,
@@ -71,6 +72,11 @@ class OpenImagesDataset(BaseDetectionDataset):
             image_id: rows.copy() for image_id, rows in self.annotations.groupby("ImageID", sort=False)
         }
         self.images_filepaths = self._filter_image_filepaths(self.images_filepaths)
+        logger.info(
+            f"Initialized dataset `{self.__class__.__name__}` with `{len(self)}` images, "
+            f"`{self.num_classes}` classes, `{len(self.annotations)}` annotations, "
+            f"images path: '{self.images_dirpath}', annotations path: '{self.annotations_filepath}'"
+        )
 
     def get_raw_sample(self, index: int) -> tuple[np.ndarray, DetectionTarget]:
         """Load an Open Images sample before TorchVision transforms are applied.

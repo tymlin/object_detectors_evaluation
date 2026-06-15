@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from time import perf_counter
 from typing import Any
 
 import numpy as np
@@ -12,7 +13,7 @@ from object_detectors_evaluation.inference.image_utils import (
     get_image_size,
     validate_image_input,
 )
-from object_detectors_evaluation.inference.predictions import DetectionPredictionBatch
+from object_detectors_evaluation.inference.predictions import DetectionLatency, DetectionPredictionBatch
 from object_detectors_evaluation.inference.types import ImageId, ImageInput, ProcessedInputs
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import ModelArtifact
@@ -59,7 +60,14 @@ class BaseDetectionInferenceEngine(ABC):
             f"Initializing inference engine `{self.engine_name}` for model `{model_artifact.spec.name}` "
             f"from path: '{model_artifact.dirpath}'"
         )
+        logger.info(
+            f"Initializing inference engine `{self.engine_name}` with config: {self.config.model_dump_json(indent=4)}"
+        )
         self.model = self.load_model()
+        logger.info(
+            f"Initialized inference engine `{self.engine_name}` with model `{model_artifact.spec.name}` "
+            f"on device `{self.device}` with dtype `{self.dtype}`"
+        )
 
     @property
     def class_space(self) -> str | None:
@@ -123,9 +131,26 @@ class BaseDetectionInferenceEngine(ABC):
         :param image_ids: Optional image ids aligned with ``images``.
         :return: Normalized detection predictions.
         """
+        preprocess_start_time = perf_counter()
         preprocessed_batch = self.preprocess(images=images, image_ids=image_ids)
+        preprocess_ms = self._elapsed_ms(start_time=preprocess_start_time)
+
+        self.synchronize()
+        inference_start_time = perf_counter()
         raw_outputs = self.predict(preprocessed_batch=preprocessed_batch)
-        return self.postprocess(preprocessed_batch=preprocessed_batch, raw_outputs=raw_outputs)
+        self.synchronize()
+        inference_ms = self._elapsed_ms(start_time=inference_start_time)
+
+        postprocess_start_time = perf_counter()
+        prediction_batch = self.postprocess(preprocessed_batch=preprocessed_batch, raw_outputs=raw_outputs)
+        postprocess_ms = self._elapsed_ms(start_time=postprocess_start_time)
+
+        latency = DetectionLatency(
+            preprocess_ms=preprocess_ms,
+            inference_ms=inference_ms,
+            postprocess_ms=postprocess_ms,
+        )
+        return prediction_batch.model_copy(update={"latency": latency})
 
     def preprocess(
         self,
@@ -168,6 +193,22 @@ class BaseDetectionInferenceEngine(ABC):
         :param raw_outputs: Backend-specific raw model outputs.
         :return: Normalized detection predictions.
         """
+
+    def synchronize(self) -> None:
+        """Synchronize backend runtime before/after inference timing.
+
+        Engines with asynchronous device execution should override this method.
+        """
+        return None
+
+    @staticmethod
+    def _elapsed_ms(start_time: float) -> float:
+        """Return elapsed milliseconds from a ``perf_counter`` start time.
+
+        :param start_time: Start time from ``perf_counter``.
+        :return: Elapsed milliseconds.
+        """
+        return (perf_counter() - start_time) * 1000
 
     def normalize_image_ids(
         self,
