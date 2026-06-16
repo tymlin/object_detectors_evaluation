@@ -1,0 +1,595 @@
+dataset:
+    name: coco
+    auto_download: false
+    config:
+        dataset_dirpath: datasets/fiftyone/coco-2017
+        split: validation
+        classes_of_interest: null
+        include_crowd: true
+        drop_images_with_crowd: false
+        remove_empty_images: false
+
+models:
+    - name: dfine-nano-coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-small-coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-medium-coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-large-coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-xlarge-coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-small-obj365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-medium-obj365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-large-obj365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-xlarge-obj365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-small-obj2coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-medium-obj2coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-large-obj2coco-e25
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: dfine-xlarge-obj2coco
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-nano
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-small
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-base
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-base-2
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-medium
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rf-detr-large
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_v2_r101vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_v2_r50vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_v2_r34vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_v2_r18vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r50vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r18vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r34vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r101vd
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r18vd_coco_o365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r50vd_coco_o365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: rtdetr_r101vd_coco_o365
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5nu
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5su
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5mu
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5lu
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5xu
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5n6u
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5s6u
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5m6u
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5l6u
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov5x6u
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov8n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov8s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov8m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov8l
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov8x
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov9t
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov9s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov9m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov9c
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov9e
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10b
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10l
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolov10x
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo11n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo11s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo11m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo11l
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo11x
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo12n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo12s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo12m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo12l
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo12x
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo26n
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo26s
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo26m
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo26l
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+    - name: yolo26x
+      engine_name: null
+      auto_download: true
+      config:
+          device: auto
+          dtype: null
+          score_threshold: 0.001
+          max_detections: 100
+
+evaluation:
+    batch_size: 1
+    num_samples: null
+    warmup_iterations: 3
+    metrics:
+        backend: pycocotools
+        extended_summary: true
+        class_metrics: true
+
+outputs:
+    save_predictions: false
+    save_plots: false
+    num_plot_samples: 10
+    plot_score_threshold: null
