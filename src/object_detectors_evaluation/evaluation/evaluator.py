@@ -30,6 +30,8 @@ from object_detectors_evaluation.utils import create_progress
 from object_detectors_evaluation.utils.files import append_jsonl, require_dirpath, save_json, save_yaml
 from object_detectors_evaluation.visualization import plot_prediction, plot_target_prediction
 
+MAP_PROGRESS_UPDATE_INTERVAL = 100
+
 
 class DetectionEvaluator:
     """Evaluate one dataset against one or more detection models.
@@ -210,6 +212,14 @@ class DetectionEvaluator:
                 progress_metrics = {}
                 if prediction_batch.latency is not None:
                     progress_metrics["latency_ms"] = f"{prediction_batch.latency.total_ms:.2f}"
+                completed_samples = progress.tasks[task_id].completed + len(targets)
+                is_map_update_batch = (batch_index + 1) % MAP_PROGRESS_UPDATE_INTERVAL == 0
+                is_last_batch = completed_samples >= num_samples
+                if is_map_update_batch or is_last_batch:
+                    running_metrics = metric.compute()
+                    running_map = running_metrics.get("map")
+                    if isinstance(running_map, int | float):
+                        progress_metrics["map"] = f"{running_map:.4f}"
 
                 progress.update(
                     task_id,
@@ -219,6 +229,20 @@ class DetectionEvaluator:
 
         metrics = metric.compute()
         latency_summary = self._summarize_latencies(latencies=latencies)
+        logger.info(
+            f"Metrics for model `{model_spec.name}`: \n"
+            f"\tmap: {self._format_metric_value(value=metrics.get('map'))}, \n"
+            f"\tmap_50: {self._format_metric_value(value=metrics.get('map_50'))}, \n"
+            f"\tmap_75: {self._format_metric_value(value=metrics.get('map_75'))}"
+        )
+        logger.info(
+            f"Average latency for model `{model_spec.name}`: \n"
+            f"\tpreprocess: {latency_summary.preprocess_mean_ms:.2f} ms, \n"
+            f"\tinference: {latency_summary.inference_mean_ms:.2f} ms, \n"
+            f"\tpostprocess: {latency_summary.postprocess_mean_ms:.2f} ms, \n"
+            f"\ttotal: {latency_summary.total_mean_ms:.2f} ms, \n"
+            f"\tnum_batches: {latency_summary.num_batches}"
+        )
         save_json(filepath=model_dirpath / "metrics.json", data=metrics)
         save_json(filepath=model_dirpath / "latency.json", data=latency_summary.model_dump(mode="json"))
 
@@ -360,6 +384,12 @@ class DetectionEvaluator:
             filepath=filepath,
             records=[to_jsonable(value=prediction.model_dump(mode="python")) for prediction in predictions],
         )
+
+    @staticmethod
+    def _format_metric_value(value: object) -> str:
+        if isinstance(value, int | float):
+            return f"{value:.4f}"
+        return str(value)
 
     @staticmethod
     def _prepare_image(image: object) -> ImageInput:
