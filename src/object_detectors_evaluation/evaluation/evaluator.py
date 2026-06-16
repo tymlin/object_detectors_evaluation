@@ -26,6 +26,7 @@ from object_detectors_evaluation.loggers import configure_logger, logger
 from object_detectors_evaluation.models import ModelArtifact, ModelSpec
 from object_detectors_evaluation.models.downloaders import build_downloaded_model, download_model, get_model_dirpath
 from object_detectors_evaluation.models.registry import get_detection_model_spec
+from object_detectors_evaluation.utils import create_progress
 from object_detectors_evaluation.utils.files import append_jsonl, require_dirpath, save_json, save_yaml
 from object_detectors_evaluation.visualization import plot_prediction, plot_target_prediction
 
@@ -135,7 +136,9 @@ class DetectionEvaluator:
         model_dirpath = self.run_dirpath / "models" / model_spec.name
         model_dirpath.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"Starting warmup for model `{model_spec.name}`")
+        logger.info(
+            f"Starting {self.config.evaluation.warmup_iterations} iterations warmup for model `{model_spec.name}`"
+        )
         self._warmup_model(engine=engine, dataset=dataset)
         logger.info(f"Finished warmup for model `{model_spec.name}`")
 
@@ -144,26 +147,44 @@ class DetectionEvaluator:
         predictions_filepath = model_dirpath / "predictions.jsonl"
         num_plotted_samples = 0
 
-        for batch_index, batch in enumerate(self._iter_batches(dataset=dataset, num_samples=num_samples)):
-            images, targets = batch
-            image_ids = [target["image_id"] for target in targets]
-            prepared_images = [self._prepare_image(image=image) for image in images]
-            prediction_batch = engine(images=prepared_images, image_ids=image_ids)
-            predictions = list(prediction_batch.predictions)
-            metric.update(predictions=predictions, targets=targets)
-            if prediction_batch.latency is not None:
-                latencies.append(prediction_batch.latency)
-            if self.config.outputs.save_predictions:
-                self._append_predictions(filepath=predictions_filepath, predictions=predictions)
-            if self._should_save_plots(num_plotted_samples=num_plotted_samples):
-                num_plotted_samples = self._save_plots(
-                    model_config=model_config,
-                    model_dirpath=model_dirpath,
-                    batch_index=batch_index,
-                    images=prepared_images,
-                    targets=targets,
-                    predictions=predictions,
-                    num_plotted_samples=num_plotted_samples,
+        with create_progress(unit="samples", console_width=200) as progress:
+            task_id = progress.add_task(
+                f"Evaluating `{model_spec.name}`",
+                total=num_samples,
+                metrics={},
+            )
+            for batch_index, batch in enumerate(self._iter_batches(dataset=dataset, num_samples=num_samples)):
+                images, targets = batch
+                image_ids = [target["image_id"] for target in targets]
+                prepared_images = [self._prepare_image(image=image) for image in images]
+                prediction_batch = engine(images=prepared_images, image_ids=image_ids)
+                predictions = list(prediction_batch.predictions)
+                metric.update(predictions=predictions, targets=targets)
+                if prediction_batch.latency is not None:
+                    latencies.append(prediction_batch.latency)
+                if self.config.outputs.save_predictions:
+                    self._append_predictions(filepath=predictions_filepath, predictions=predictions)
+                if self._should_save_plots(num_plotted_samples=num_plotted_samples):
+                    num_plotted_samples = self._save_plots(
+                        model_config=model_config,
+                        model_dirpath=model_dirpath,
+                        batch_index=batch_index,
+                        images=prepared_images,
+                        targets=targets,
+                        predictions=predictions,
+                        num_plotted_samples=num_plotted_samples,
+                    )
+
+                progress_metrics = {
+                    "predictions": sum(prediction.num_predictions for prediction in predictions),
+                }
+                if prediction_batch.latency is not None:
+                    progress_metrics["latency_ms"] = f"{prediction_batch.latency.total_ms:.2f}"
+
+                progress.update(
+                    task_id,
+                    advance=len(targets),
+                    metrics=progress_metrics,
                 )
 
         metrics = metric.compute()

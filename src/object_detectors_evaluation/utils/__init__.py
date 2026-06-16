@@ -7,6 +7,13 @@ from object_detectors_evaluation.utils.files import (
     save_json,
     save_yaml,
 )
+from object_detectors_evaluation.utils.progress import (
+    CountColumn,
+    MetricsColumn,
+    ProgressMetrics,
+    create_progress,
+    normalize_progress_total,
+)
 
 __all__ = [
     "append_jsonl",
@@ -16,4 +23,9 @@ __all__ = [
     "require_filepath",
     "save_json",
     "save_yaml",
+    "CountColumn",
+    "MetricsColumn",
+    "ProgressMetrics",
+    "create_progress",
+    "normalize_progress_total",
 ]
