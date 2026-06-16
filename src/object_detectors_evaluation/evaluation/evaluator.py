@@ -175,9 +175,7 @@ class DetectionEvaluator:
                         num_plotted_samples=num_plotted_samples,
                     )
 
-                progress_metrics = {
-                    "predictions": sum(prediction.num_predictions for prediction in predictions),
-                }
+                progress_metrics = {}
                 if prediction_batch.latency is not None:
                     progress_metrics["latency_ms"] = f"{prediction_batch.latency.total_ms:.2f}"
 

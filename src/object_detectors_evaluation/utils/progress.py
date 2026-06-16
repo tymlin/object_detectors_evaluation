@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 from rich.console import Console
-from rich.progress import BarColumn, Progress, ProgressColumn, SpinnerColumn, Task, TextColumn, TimeElapsedColumn
+from rich.progress import (
+    BarColumn,
+    Progress,
+    ProgressColumn,
+    SpinnerColumn,
+    Task,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 from rich.table import Column
 from rich.text import Text
 
@@ -88,6 +97,7 @@ def create_progress(
     if show_metrics:
         columns.append(MetricsColumn(no_wrap=no_wrap))
     columns.append(TimeElapsedColumn())
+    columns.append(TimeRemainingColumn())
 
     return Progress(
         *columns,

@@ -173,4 +173,6 @@ class DetectionEvaluatorConfig(BaseModel):
         :return: Parsed evaluator config.
         """
         data = load_yaml(filepath=filepath)
+        # ``defaults`` is a YAML-only section used for anchors and aliases, not part of the runtime schema.
+        data.pop("defaults", None)
         return cls.model_validate(data)

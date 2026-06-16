@@ -42,7 +42,9 @@ class DetectionMeanAveragePrecision:
 
         :return: Metric output.
         """
-        return to_jsonable(value=self.metric.compute())
+        metrics = self.metric.compute()
+        metrics_json = to_jsonable(value=metrics)
+        return metrics_json
 
     @staticmethod
     def _prediction_to_torchmetrics(prediction: DetectionPrediction) -> dict[str, torch.Tensor]:
