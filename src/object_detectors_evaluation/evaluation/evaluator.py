@@ -22,7 +22,7 @@ from object_detectors_evaluation.inference.engines import BaseDetectionInference
 from object_detectors_evaluation.inference.predictions import DetectionLatency, DetectionPrediction
 from object_detectors_evaluation.inference.registry import resolve_detection_inference_engine_class
 from object_detectors_evaluation.inference.types import ImageInput
-from object_detectors_evaluation.loggers import configure_logger, logger
+from object_detectors_evaluation.loggers import configure_logger, log_breaking_point, logger
 from object_detectors_evaluation.models import ModelArtifact, ModelSpec
 from object_detectors_evaluation.models.downloaders import build_downloaded_model, download_model, get_model_dirpath
 from object_detectors_evaluation.models.registry import get_detection_model_spec
@@ -54,6 +54,14 @@ class DetectionEvaluator:
         configure_logger(
             run_dirpath=self.run_dirpath / "logs",
             log_filename="evaluation.log",
+        )
+        log_breaking_point(
+            logger,
+            msg="Detection evaluation run",
+            n_top=1,
+            n_bottom=1,
+            top_char="=",
+            bottom_char="=",
         )
         logger.info(f"Initializing detection evaluator with config: {config.model_dump_json(indent=4)}")
         logger.info(f"Initialized detection evaluator run `{self.run_name}` at path: '{self.run_dirpath}'")
@@ -95,10 +103,26 @@ class DetectionEvaluator:
             models=tuple(model_results),
         )
         save_json(filepath=self.run_dirpath / "summary.json", data=result.model_dump(mode="json"))
+        log_breaking_point(
+            logger,
+            msg="Finished detection evaluation run",
+            n_top=1,
+            n_bottom=1,
+            top_char="=",
+            bottom_char="=",
+        )
         logger.info(f"Finished detection evaluator run `{self.run_name}` at path: '{self.run_dirpath}'")
         return result
 
     def _create_dataset(self) -> BaseDetectionDataset:
+        log_breaking_point(
+            logger,
+            msg=f"Dataset: `{self.config.dataset.name}`",
+            n_top=1,
+            n_bottom=1,
+            top_char="-",
+            bottom_char="-",
+        )
         if self.config.dataset.auto_download:
             download_dataset(
                 dataset_name=self.config.dataset.name,
@@ -125,6 +149,14 @@ class DetectionEvaluator:
         num_samples: int,
     ) -> DetectionEvaluationModelResult:
         model_spec = get_detection_model_spec(model_config.name)
+        log_breaking_point(
+            logger,
+            msg=f"Model: `{model_spec.name}`",
+            n_top=1,
+            n_bottom=1,
+            top_char="-",
+            bottom_char="-",
+        )
         self._validate_class_space(model_class_space=model_spec.class_space)
         model_artifact = self._get_model_artifact(model_spec=model_spec, auto_download=model_config.auto_download)
 
