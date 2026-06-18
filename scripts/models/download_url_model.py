@@ -1,18 +1,49 @@
+import argparse
+from pathlib import Path
+
 from object_detectors_evaluation.consts import MODELS_DIRPATH
 from object_detectors_evaluation.loggers import logger
-from object_detectors_evaluation.models.collections import ULTRALYTICS_YOLO_DETECTION_MODELS
 from object_detectors_evaluation.models.downloaders import download_url_model
+from object_detectors_evaluation.models.registry import get_detection_model_spec
 
-MODEL_SPEC = ULTRALYTICS_YOLO_DETECTION_MODELS[0]
-OVERWRITE = False
+DEFAULT_MODEL_NAME = "yolov5nu"
+DEFAULT_MODELS_DIRPATH = MODELS_DIRPATH
+DEFAULT_OVERWRITE = False
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    :return: Parsed command-line arguments.
+    """
+    parser = argparse.ArgumentParser(
+        description="Download a registered direct-URL detection model.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--model-name", default=DEFAULT_MODEL_NAME, help="Registered direct-URL model name.")
+    parser.add_argument(
+        "--models-dirpath",
+        type=Path,
+        default=DEFAULT_MODELS_DIRPATH,
+        help="Root model directory.",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action=argparse.BooleanOptionalAction,
+        default=DEFAULT_OVERWRITE,
+        help="Overwrite an existing model artifact.",
+    )
+    return parser.parse_args()
 
 
 def main() -> None:
-    logger.info(f"Downloading URL model `{MODEL_SPEC.name}` to path: '{MODELS_DIRPATH}'")
+    args = parse_args()
+    model_spec = get_detection_model_spec(args.model_name)
+    logger.info(f"Downloading URL model `{model_spec.name}` to path: '{args.models_dirpath}'")
     downloaded_model = download_url_model(
-        spec=MODEL_SPEC,
-        models_dirpath=MODELS_DIRPATH,
-        overwrite=OVERWRITE,
+        spec=model_spec,
+        models_dirpath=args.models_dirpath,
+        overwrite=args.overwrite,
     )
     logger.info(
         f"Downloaded model `{downloaded_model.spec.name}` with {len(downloaded_model.filepaths)} files "

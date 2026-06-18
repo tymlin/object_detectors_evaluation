@@ -10,7 +10,7 @@ dataset:
         remove_empty_images: false
 
 models:
-    - name: yolov8n
+    - name: dfine-medium-coco
       engine_name: null
       auto_download: true
       config:
@@ -22,7 +22,7 @@ models:
 evaluation:
     batch_size: 1
     num_samples: null
-    warmup_iterations: 3
+    warmup_iterations: 5
     metrics:
         backend: pycocotools
         extended_summary: true

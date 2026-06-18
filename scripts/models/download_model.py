@@ -1,19 +1,49 @@
+import argparse
+from pathlib import Path
+
 from object_detectors_evaluation.consts import MODELS_DIRPATH
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models.downloaders import download_model
 from object_detectors_evaluation.models.registry import get_detection_model_spec
 
-MODEL_NAME = "yolov8n"
-OVERWRITE = False
+DEFAULT_MODEL_NAME = "yolov8n"
+DEFAULT_MODELS_DIRPATH = MODELS_DIRPATH
+DEFAULT_OVERWRITE = False
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    :return: Parsed command-line arguments.
+    """
+    parser = argparse.ArgumentParser(
+        description="Download a registered detection model.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--model-name", default=DEFAULT_MODEL_NAME, help="Registered detection model name.")
+    parser.add_argument(
+        "--models-dirpath",
+        type=Path,
+        default=DEFAULT_MODELS_DIRPATH,
+        help="Root model directory.",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action=argparse.BooleanOptionalAction,
+        default=DEFAULT_OVERWRITE,
+        help="Overwrite an existing direct-URL model artifact.",
+    )
+    return parser.parse_args()
 
 
 def main() -> None:
-    model_spec = get_detection_model_spec(MODEL_NAME)
-    logger.info(f"Downloading model `{model_spec.name}` to path: '{MODELS_DIRPATH}'")
-    download_kwargs = {"overwrite": OVERWRITE} if model_spec.source_type == "url" else {}
+    args = parse_args()
+    model_spec = get_detection_model_spec(args.model_name)
+    logger.info(f"Downloading model `{model_spec.name}` to path: '{args.models_dirpath}'")
+    download_kwargs = {"overwrite": args.overwrite} if model_spec.source_type == "url" else {}
     downloaded_model = download_model(
         spec=model_spec,
-        models_dirpath=MODELS_DIRPATH,
+        models_dirpath=args.models_dirpath,
         **download_kwargs,
     )
     logger.info(
