@@ -1,5 +1,5 @@
 import json
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +19,30 @@ def load_json(filepath: str | Path) -> dict[str, Any]:
     logger.info(f"Loading JSON file from path: '{filepath}'")
     with filepath.open() as file:
         return json.load(file)
+
+
+def load_jsonl(filepath: str | Path) -> list[Any]:
+    """Load records from a JSON Lines file.
+
+    :param filepath: JSON Lines filepath.
+    :return: Loaded JSON-compatible records.
+    """
+    return list(iter_jsonl(filepath=filepath))
+
+
+def iter_jsonl(filepath: str | Path) -> Iterator[Any]:
+    """Iterate over records from a JSON Lines file.
+
+    :param filepath: JSON Lines filepath.
+    :return: Iterator over JSON-compatible records.
+    """
+    filepath = Path(filepath)
+    require_filepath(filepath=filepath, description="JSON Lines")
+    logger.info(f"Reading JSON Lines file from path: '{filepath}'")
+    with filepath.open() as file:
+        for line in file:
+            if line.strip():
+                yield json.loads(line)
 
 
 def save_json(filepath: str | Path, data: object, indent: int = 4) -> None:
@@ -47,6 +71,18 @@ def append_jsonl(filepath: str | Path, records: Iterable[object]) -> None:
     with filepath.open("a") as file:
         for record in records:
             file.write(json.dumps(record) + "\n")
+
+
+def save_text(filepath: str | Path, text: str) -> None:
+    """Save text to a file.
+
+    :param filepath: Output text filepath.
+    :param text: Text content.
+    """
+    filepath = Path(filepath)
+    require_dirpath(dirpath=filepath.parent, description="parent")
+    logger.info(f"Saving text file to path: '{filepath}'")
+    filepath.write_text(text)
 
 
 def load_yaml(filepath: str | Path) -> Any:
