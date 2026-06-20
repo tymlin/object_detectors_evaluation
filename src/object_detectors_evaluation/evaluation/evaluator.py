@@ -21,7 +21,7 @@ from object_detectors_evaluation.evaluation.results import (
 from object_detectors_evaluation.inference.engines import BaseDetectionInferenceEngine
 from object_detectors_evaluation.inference.predictions import DetectionLatency, DetectionPrediction
 from object_detectors_evaluation.inference.registry import resolve_detection_inference_engine_class
-from object_detectors_evaluation.inference.types import ImageInput
+from object_detectors_evaluation.inference.types import ImageId, ImageInput
 from object_detectors_evaluation.loggers import configure_logger, log_breaking_point, logger
 from object_detectors_evaluation.models import ModelArtifact, ModelSpec
 from object_detectors_evaluation.models.downloaders import build_downloaded_model, download_model, get_model_dirpath
@@ -84,6 +84,7 @@ class DetectionEvaluator:
         self._save_run_config()
         dataset = self._create_dataset()
         num_samples = self._resolve_num_samples(dataset=dataset)
+        self._save_class_map(dataset=dataset)
         model_results = []
         num_models_to_evaluate = len(self.config.models)
         for model_ix, model_config in enumerate(self.config.models):
@@ -99,6 +100,7 @@ class DetectionEvaluator:
                 model_config=model_config,
                 dataset=dataset,
                 num_samples=num_samples,
+                save_targets=model_ix == 0,
             )
             model_results.append(model_result)
 
@@ -155,6 +157,7 @@ class DetectionEvaluator:
         model_config: DetectionEvaluatorModelConfig,
         dataset: BaseDetectionDataset,
         num_samples: int,
+        save_targets: bool,
     ) -> DetectionEvaluationModelResult:
         model_spec = get_detection_model_spec(model_config.name)
         self._validate_class_space(model_class_space=model_spec.class_space)
@@ -177,7 +180,10 @@ class DetectionEvaluator:
         metric = DetectionMeanAveragePrecision(config=self.config.evaluation.metrics)
         map_progress_update_interval = self.config.evaluation.map_progress_update_interval
         latencies = []
+        num_latency_images = 0
+        targets_filepath = self.run_dirpath / "targets.jsonl"
         predictions_filepath = model_dirpath / "predictions.jsonl"
+        latency_filepath = model_dirpath / "latency.jsonl"
         num_plotted_samples = 0
 
         with create_progress(unit="samples", console_width=300, bar_width=50) as progress:
@@ -187,16 +193,34 @@ class DetectionEvaluator:
                 metrics={},
             )
             for batch_index, batch in enumerate(self._iter_batches(dataset=dataset, num_samples=num_samples)):
-                images, targets = batch
+                sample_indices, images, targets = batch
                 image_ids = [target["image_id"] for target in targets]
+                if save_targets:
+                    self._append_targets(
+                        filepath=targets_filepath,
+                        sample_indices=sample_indices,
+                        targets=targets,
+                    )
                 prepared_images = [self._prepare_image(image=image) for image in images]
                 prediction_batch = engine(images=prepared_images, image_ids=image_ids)
                 predictions = list(prediction_batch.predictions)
                 metric.update(predictions=predictions, targets=targets)
                 if prediction_batch.latency is not None:
                     latencies.append(prediction_batch.latency)
+                    num_latency_images += len(targets)
+                    self._append_latency(
+                        filepath=latency_filepath,
+                        batch_index=batch_index,
+                        sample_indices=sample_indices,
+                        image_ids=image_ids,
+                        latency=prediction_batch.latency,
+                    )
                 if self.config.outputs.save_predictions:
-                    self._append_predictions(filepath=predictions_filepath, predictions=predictions)
+                    self._append_predictions(
+                        filepath=predictions_filepath,
+                        sample_indices=sample_indices,
+                        predictions=predictions,
+                    )
                 if self._should_save_plots(num_plotted_samples=num_plotted_samples):
                     num_plotted_samples = self._save_plots(
                         model_config=model_config,
@@ -229,7 +253,7 @@ class DetectionEvaluator:
                 )
 
         metrics = metric.compute()
-        latency_summary = self._summarize_latencies(latencies=latencies)
+        latency_summary = self._summarize_latencies(latencies=latencies, num_images=num_latency_images)
         logger.info(
             f"Metrics for model `{model_spec.name}`: \n"
             f"\tmap: {self._format_metric_value(value=metrics.get('map'))}, \n"
@@ -242,10 +266,15 @@ class DetectionEvaluator:
             f"\tinference: {latency_summary.inference_mean_ms:.2f} ms, \n"
             f"\tpostprocess: {latency_summary.postprocess_mean_ms:.2f} ms, \n"
             f"\ttotal: {latency_summary.total_mean_ms:.2f} ms, \n"
+            f"\ttotal p50: {latency_summary.total_p50_ms:.2f} ms, \n"
+            f"\ttotal p95: {latency_summary.total_p95_ms:.2f} ms, \n"
+            f"\ttotal p99: {latency_summary.total_p99_ms:.2f} ms, \n"
+            f"\tthroughput: {latency_summary.throughput_images_per_second:.2f} images/s, \n"
+            f"\tnum_images: {latency_summary.num_images}, \n"
             f"\tnum_batches: {latency_summary.num_batches}"
         )
         save_json(filepath=model_dirpath / "metrics.json", data=metrics)
-        save_json(filepath=model_dirpath / "latency.json", data=latency_summary.model_dump(mode="json"))
+        save_json(filepath=model_dirpath / "latency_summary.json", data=latency_summary.model_dump(mode="json"))
 
         result = DetectionEvaluationModelResult(
             model_name=model_spec.name,
@@ -286,12 +315,13 @@ class DetectionEvaluator:
         self,
         dataset: BaseDetectionDataset,
         num_samples: int,
-    ) -> Iterator[tuple[list[object], list[DetectionTarget]]]:
+    ) -> Iterator[tuple[list[int], list[object], list[DetectionTarget]]]:
         batch_size = self.config.evaluation.batch_size
         for start_index in range(0, num_samples, batch_size):
-            batch_items = [dataset[index] for index in range(start_index, min(start_index + batch_size, num_samples))]
+            sample_indices = list(range(start_index, min(start_index + batch_size, num_samples)))
+            batch_items = [dataset[index] for index in sample_indices]
             images, targets = zip(*batch_items)
-            yield list(images), list(targets)
+            yield sample_indices, list(images), list(targets)
 
     def _resolve_num_samples(self, dataset: BaseDetectionDataset) -> int:
         available_num_samples = len(dataset)
@@ -380,10 +410,80 @@ class DetectionEvaluator:
         resolved_config["dataset"]["config"]["dataset_dirpath"] = str(self.dataset_config.dataset_dirpath)
         save_json(filepath=self.run_dirpath / "resolved_config.json", data=resolved_config)
 
-    def _append_predictions(self, filepath: Path, predictions: list[DetectionPrediction]) -> None:
+    def _save_class_map(self, dataset: BaseDetectionDataset) -> None:
+        class_ids = dataset.get_class_ids()
+        class_names = dataset.get_class_names()
+        source_class_ids = dataset.get_source_class_ids()
+        classes = []
+        for class_id, class_name, source_class_id in zip(class_ids, class_names, source_class_ids):
+            class_record = {
+                "label": class_id,
+                "name": class_name,
+                "source_id": to_jsonable(value=source_class_id),
+            }
+            classes.append(class_record)
+
+        class_map = {
+            "dataset_name": self.config.dataset.name,
+            "class_space": self.config.dataset.name,
+            "classes": classes,
+        }
+        save_json(filepath=self.run_dirpath / "class_map.json", data=class_map)
+
+    def _append_targets(
+        self,
+        filepath: Path,
+        sample_indices: list[int],
+        targets: list[DetectionTarget],
+    ) -> None:
+        records = []
+        for sample_index, target in zip(sample_indices, targets):
+            target_record = {
+                "sample_index": sample_index,
+                "box_format": "xyxy",
+            }
+            target_record.update(to_jsonable(value=target))
+            records.append(target_record)
+        append_jsonl(filepath=filepath, records=records)
+
+    def _append_predictions(
+        self,
+        filepath: Path,
+        sample_indices: list[int],
+        predictions: list[DetectionPrediction],
+    ) -> None:
+        records = []
+        for sample_index, prediction in zip(sample_indices, predictions):
+            prediction_record = {
+                "sample_index": sample_index,
+                "box_format": "xyxy",
+            }
+            prediction_record.update(to_jsonable(value=prediction.model_dump(mode="python")))
+            records.append(prediction_record)
+        append_jsonl(filepath=filepath, records=records)
+
+    @staticmethod
+    def _append_latency(
+        filepath: Path,
+        batch_index: int,
+        sample_indices: list[int],
+        image_ids: list[ImageId],
+        latency: DetectionLatency,
+    ) -> None:
+        latency_record = {
+            "batch_index": batch_index,
+            "sample_indices": sample_indices,
+            "image_ids": image_ids,
+            "batch_size": len(sample_indices),
+            "preprocess_ms": latency.preprocess_ms,
+            "inference_ms": latency.inference_ms,
+            "postprocess_ms": latency.postprocess_ms,
+            "total_ms": latency.total_ms,
+        }
+        records = [to_jsonable(value=latency_record)]
         append_jsonl(
             filepath=filepath,
-            records=[to_jsonable(value=prediction.model_dump(mode="python")) for prediction in predictions],
+            records=records,
         )
 
     @staticmethod
@@ -406,24 +506,48 @@ class DetectionEvaluator:
         raise TypeError(msg)
 
     @staticmethod
-    def _summarize_latencies(latencies: list[DetectionLatency]) -> DetectionEvaluationLatencySummary:
+    def _summarize_latencies(
+        latencies: list[DetectionLatency],
+        num_images: int,
+    ) -> DetectionEvaluationLatencySummary:
         if not latencies:
             return DetectionEvaluationLatencySummary(
                 preprocess_mean_ms=0.0,
                 inference_mean_ms=0.0,
                 postprocess_mean_ms=0.0,
                 total_mean_ms=0.0,
+                total_std_ms=0.0,
+                total_min_ms=0.0,
+                total_p50_ms=0.0,
+                total_p90_ms=0.0,
+                total_p95_ms=0.0,
+                total_p99_ms=0.0,
+                total_max_ms=0.0,
+                throughput_images_per_second=0.0,
+                num_images=0,
                 num_batches=0,
             )
 
         preprocess_mean_ms = float(np.mean([latency.preprocess_ms for latency in latencies]))
         inference_mean_ms = float(np.mean([latency.inference_ms for latency in latencies]))
         postprocess_mean_ms = float(np.mean([latency.postprocess_ms for latency in latencies]))
-        total_mean_ms = float(np.mean([latency.total_ms for latency in latencies]))
+        total_latencies_ms = np.asarray([latency.total_ms for latency in latencies], dtype=np.float64)
+        total_mean_ms = float(np.mean(total_latencies_ms))
+        total_latency_ms = float(np.sum(total_latencies_ms))
+        throughput_images_per_second = num_images / (total_latency_ms / 1000) if total_latency_ms > 0 else 0.0
         return DetectionEvaluationLatencySummary(
             preprocess_mean_ms=preprocess_mean_ms,
             inference_mean_ms=inference_mean_ms,
             postprocess_mean_ms=postprocess_mean_ms,
             total_mean_ms=total_mean_ms,
+            total_std_ms=float(np.std(total_latencies_ms)),
+            total_min_ms=float(np.min(total_latencies_ms)),
+            total_p50_ms=float(np.percentile(total_latencies_ms, 50)),
+            total_p90_ms=float(np.percentile(total_latencies_ms, 90)),
+            total_p95_ms=float(np.percentile(total_latencies_ms, 95)),
+            total_p99_ms=float(np.percentile(total_latencies_ms, 99)),
+            total_max_ms=float(np.max(total_latencies_ms)),
+            throughput_images_per_second=throughput_images_per_second,
+            num_images=num_images,
             num_batches=len(latencies),
         )
