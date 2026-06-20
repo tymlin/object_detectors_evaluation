@@ -43,7 +43,7 @@ def append_jsonl(filepath: str | Path, records: Iterable[object]) -> None:
     """
     filepath = Path(filepath)
     require_dirpath(dirpath=filepath.parent, description="parent")
-    logger.info(f"Appending JSON Lines file at path: '{filepath}'")
+    logger.debug(f"Appending JSON Lines file at path: '{filepath}'")
     with filepath.open("a") as file:
         for record in records:
             file.write(json.dumps(record) + "\n")

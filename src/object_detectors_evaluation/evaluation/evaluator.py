@@ -87,8 +87,16 @@ class DetectionEvaluator:
         dataset = self._create_dataset()
         num_samples = self._resolve_num_samples(dataset=dataset)
         model_results = []
-
-        for model_config in self.config.models:
+        num_models_to_evaluate = len(self.config.models)
+        for model_ix, model_config in enumerate(self.config.models):
+            log_breaking_point(
+                logger,
+                msg=f"Model: `{model_config.name}` ({model_ix+1}/{num_models_to_evaluate})",
+                n_top=1,
+                n_bottom=1,
+                top_char="-",
+                bottom_char="-",
+            )
             model_result = self._evaluate_model(
                 model_config=model_config,
                 dataset=dataset,
@@ -151,14 +159,6 @@ class DetectionEvaluator:
         num_samples: int,
     ) -> DetectionEvaluationModelResult:
         model_spec = get_detection_model_spec(model_config.name)
-        log_breaking_point(
-            logger,
-            msg=f"Model: `{model_spec.name}`",
-            n_top=1,
-            n_bottom=1,
-            top_char="-",
-            bottom_char="-",
-        )
         self._validate_class_space(model_class_space=model_spec.class_space)
         model_artifact = self._get_model_artifact(model_spec=model_spec, auto_download=model_config.auto_download)
 
@@ -181,7 +181,7 @@ class DetectionEvaluator:
         predictions_filepath = model_dirpath / "predictions.jsonl"
         num_plotted_samples = 0
 
-        with create_progress(unit="samples", console_width=200) as progress:
+        with create_progress(unit="samples", console_width=300, bar_width=50) as progress:
             task_id = progress.add_task(
                 f"Evaluating `{model_spec.name}`",
                 total=num_samples,
