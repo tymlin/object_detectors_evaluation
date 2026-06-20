@@ -1,4 +1,4 @@
-run_name_postfix: null
+run_name_postfix: example
 
 dataset:
     name: coco
@@ -23,9 +23,9 @@ models:
 
 evaluation:
     batch_size: 1
-    num_samples: null
+    num_samples: 10
     warmup_iterations: 5
-    map_progress_update_interval: 100
+    map_progress_update_interval: 1
     metrics:
         backend: pycocotools
         extended_summary: true
