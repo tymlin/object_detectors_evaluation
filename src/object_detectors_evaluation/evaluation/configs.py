@@ -115,6 +115,7 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
     :param batch_size: Number of dataset samples to evaluate per engine call.
     :param num_samples: Optional number of dataset samples to evaluate. ``None`` means all samples.
     :param warmup_iterations: Number of warmup engine calls before measuring a model.
+    :param map_progress_update_interval: Optional number of batches between running mAP progress updates.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -134,6 +135,11 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
         ge=0,
         description="Number of warmup engine calls before measuring a model.",
     )
+    map_progress_update_interval: int | None = Field(
+        default=100,
+        ge=1,
+        description="Optional number of batches between running mAP progress updates. `None` disables them.",
+    )
     metrics: DetectionEvaluatorMetricsConfig = Field(
         default_factory=DetectionEvaluatorMetricsConfig,
         description="Mean average precision metric configuration.",
@@ -143,6 +149,7 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
 class DetectionEvaluatorConfig(BaseModel):
     """Top-level detection evaluator config.
 
+    :param run_name_postfix: Optional path-safe postfix appended to the timestamped run name.
     :param dataset: Dataset configuration.
     :param models: Model configurations to evaluate on the dataset.
     :param evaluation: Evaluator runtime and metric configuration.
@@ -151,6 +158,13 @@ class DetectionEvaluatorConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid")
 
+    run_name_postfix: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]*$",
+        description="Optional path-safe postfix appended to the timestamped run name.",
+    )
     dataset: DetectionEvaluatorDatasetConfig = Field(description="Dataset configuration.")
     models: tuple[DetectionEvaluatorModelConfig, ...] = Field(
         min_length=1,

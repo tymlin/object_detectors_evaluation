@@ -1,3 +1,5 @@
+run_name_postfix: null
+
 dataset:
     name: coco
     auto_download: false
@@ -13,15 +15,16 @@ evaluation:
     batch_size: 1
     num_samples: null
     warmup_iterations: 10
+    map_progress_update_interval: 100
     metrics:
         backend: pycocotools
         extended_summary: false
         class_metrics: true
 
 outputs:
-    save_predictions: false
-    save_plots: false
-    num_plot_samples: 10
+    save_predictions: true
+    save_plots: true
+    num_plot_samples: null
     plot_score_threshold: null
 
 defaults:
@@ -29,7 +32,7 @@ defaults:
         engine_name: null
         auto_download: true
         config:
-            device: cpu
+            device: auto
             dtype: float32
             score_threshold: 0.001
             max_detections: null

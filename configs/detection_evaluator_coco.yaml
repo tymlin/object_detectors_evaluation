@@ -1,3 +1,5 @@
+run_name_postfix: null
+
 dataset:
     name: coco
     auto_download: false
@@ -23,13 +25,14 @@ evaluation:
     batch_size: 1
     num_samples: null
     warmup_iterations: 5
+    map_progress_update_interval: 100
     metrics:
         backend: pycocotools
         extended_summary: true
         class_metrics: true
 
 outputs:
-    save_predictions: false
+    save_predictions: true
     save_plots: true
-    num_plot_samples: 10
+    num_plot_samples: null
     plot_score_threshold: null

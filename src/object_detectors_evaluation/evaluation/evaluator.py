@@ -30,8 +30,6 @@ from object_detectors_evaluation.utils import create_progress
 from object_detectors_evaluation.utils.files import append_jsonl, require_dirpath, save_json, save_yaml
 from object_detectors_evaluation.visualization import plot_prediction, plot_target_prediction
 
-MAP_PROGRESS_UPDATE_INTERVAL = 100
-
 
 class DetectionEvaluator:
     """Evaluate one dataset against one or more detection models.
@@ -49,7 +47,7 @@ class DetectionEvaluator:
     ) -> None:
         self.config = config
         self.config_filepath = Path(config_filepath) if config_filepath is not None else None
-        self.run_name = NOW
+        self.run_name = NOW if config.run_name_postfix is None else f"{NOW}_{config.run_name_postfix}"
         self.run_dirpath = RUNS_DIRPATH / self.run_group_name / self.run_name
         self.dataset_config = config.dataset.config
         self.run_dirpath.mkdir(parents=True, exist_ok=True)
@@ -177,6 +175,7 @@ class DetectionEvaluator:
         logger.info(f"Finished warmup for model `{model_spec.name}`")
 
         metric = DetectionMeanAveragePrecision(config=self.config.evaluation.metrics)
+        map_progress_update_interval = self.config.evaluation.map_progress_update_interval
         latencies = []
         predictions_filepath = model_dirpath / "predictions.jsonl"
         num_plotted_samples = 0
@@ -213,7 +212,9 @@ class DetectionEvaluator:
                 if prediction_batch.latency is not None:
                     progress_metrics["latency_ms"] = f"{prediction_batch.latency.total_ms:.2f}"
                 completed_samples = progress.tasks[task_id].completed + len(targets)
-                is_map_update_batch = (batch_index + 1) % MAP_PROGRESS_UPDATE_INTERVAL == 0
+                is_map_update_batch = (
+                    map_progress_update_interval is not None and (batch_index + 1) % map_progress_update_interval == 0
+                )
                 is_last_batch = completed_samples >= num_samples
                 if is_map_update_batch or is_last_batch:
                     running_metrics = metric.compute()
