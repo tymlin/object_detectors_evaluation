@@ -6,6 +6,7 @@ import pandas as pd
 import seaborn as sns
 from matplotlib import colormaps
 from matplotlib.colors import to_hex
+from natsort import natsorted
 from plotly import graph_objects as go
 from plotly.io import to_html
 from plotly.offline import get_plotlyjs
@@ -113,6 +114,16 @@ def _metrics_comparison_plot(leaderboard: pd.DataFrame) -> dict[str, str]:
         )
     figure.update_layout(barmode="group")
     _style_figure(figure=figure, model_names=model_names, x_title="Average precision")
+    _add_model_sort_menu(
+        figure=figure,
+        leaderboard=leaderboard,
+        sort_fields=(
+            ("map", "Overall mAP"),
+            ("map_50", "mAP50"),
+            ("map_75", "mAP75"),
+            (None, "Model name"),
+        ),
+    )
     return _plot_record(
         plot_id="metrics-comparison",
         title="Accuracy metrics",
@@ -140,6 +151,17 @@ def _object_size_plot(leaderboard: pd.DataFrame) -> dict[str, str]:
         )
     figure.update_layout(barmode="group")
     _style_figure(figure=figure, model_names=model_names, x_title="Mean average precision")
+    _add_model_sort_menu(
+        figure=figure,
+        leaderboard=leaderboard,
+        sort_fields=(
+            ("map", "Overall mAP"),
+            ("map_small", "Small-object mAP"),
+            ("map_medium", "Medium-object mAP"),
+            ("map_large", "Large-object mAP"),
+            (None, "Model name"),
+        ),
+    )
     return _plot_record(
         plot_id="object-size-map",
         title="Object-size accuracy",
@@ -205,9 +227,10 @@ def _accuracy_latency_plot(leaderboard: pd.DataFrame, latency_field: LatencyFiel
     figure.add_scatter(
         x=data[latency_field],
         y=data["map"],
-        mode="markers",
+        mode="markers+text",
         name="Models",
         text=data["model"],
+        textposition="top center",
         customdata=customdata,
         marker={
             "color": data["map"],
@@ -429,6 +452,53 @@ def _style_figure(
 
 def _plot_height(num_models: int) -> int:
     return max(420, min(1200, 220 + num_models * 34))
+
+
+def _add_model_sort_menu(
+    figure: go.Figure,
+    leaderboard: pd.DataFrame,
+    sort_fields: tuple[tuple[str | None, str], ...],
+) -> None:
+    buttons = []
+    for field_name, label in sort_fields:
+        if field_name is None:
+            categoryarray = list(reversed(natsorted(leaderboard["model"].tolist())))
+        else:
+            sorted_leaderboard = leaderboard.sort_values(
+                field_name,
+                ascending=True,
+                na_position="first",
+                kind="stable",
+            )
+            categoryarray = sorted_leaderboard["model"].tolist()
+        buttons.append(
+            {
+                "label": f"Sort by: {label}",
+                "method": "relayout",
+                "args": [
+                    {
+                        "yaxis.categoryorder": "array",
+                        "yaxis.categoryarray": categoryarray,
+                    }
+                ],
+            }
+        )
+
+    figure.update_layout(
+        updatemenus=[
+            {
+                "type": "dropdown",
+                "direction": "down",
+                "showactive": True,
+                "active": 0,
+                "x": 0,
+                "xanchor": "left",
+                "y": 1.08,
+                "yanchor": "top",
+                "buttons": buttons,
+            }
+        ],
+    )
 
 
 def _plot_record(plot_id: str, title: str, description: str, figure: go.Figure) -> dict[str, str]:
