@@ -24,7 +24,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
     ModelSpec(
@@ -38,7 +38,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
     ModelSpec(
@@ -52,7 +52,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
     ModelSpec(
@@ -66,7 +66,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
     ModelSpec(
@@ -80,7 +80,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
     ModelSpec(
@@ -94,7 +94,7 @@ RFDETR_MODELS: tuple[ModelSpec, ...] = (
         class_space="coco",
         training_dataset="COCO",
         checkpoint_format="safetensors",
-        inference_engine="transformers",
+        inference_engine="rf_detr",
         note="Detection checkpoint from the official Roboflow Hugging Face organization page.",
     ),
 )

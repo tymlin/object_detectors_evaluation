@@ -1,8 +1,11 @@
 from typing import TypeAlias
 
-from object_detectors_evaluation.inference.engines.base import BaseDetectionInferenceEngine
-from object_detectors_evaluation.inference.engines.transformers import TransformersDetectionInferenceEngine
-from object_detectors_evaluation.inference.engines.ultralytics import UltralyticsDetectionInferenceEngine
+from object_detectors_evaluation.inference.engines import (
+    BaseDetectionInferenceEngine,
+    RFDetrDetectionInferenceEngine,
+    TransformersDetectionInferenceEngine,
+    UltralyticsDetectionInferenceEngine,
+)
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.models import ModelSpec
 
@@ -11,6 +14,7 @@ DetectionInferenceEngineClass: TypeAlias = type[BaseDetectionInferenceEngine]
 DETECTION_INFERENCE_ENGINE_CLASSES: tuple[DetectionInferenceEngineClass, ...] = (
     UltralyticsDetectionInferenceEngine,
     TransformersDetectionInferenceEngine,
+    RFDetrDetectionInferenceEngine,
 )
 DETECTION_INFERENCE_ENGINE_BY_NAME: dict[str, DetectionInferenceEngineClass] = {
     engine_class.engine_name: engine_class for engine_class in DETECTION_INFERENCE_ENGINE_CLASSES
