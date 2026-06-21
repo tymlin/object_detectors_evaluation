@@ -49,9 +49,8 @@ class TransformersDetectionInferenceEngine(BaseDetectionInferenceEngine):
         model.eval()
         return model
 
-    @property
-    def class_id_to_name(self) -> Mapping[int, str] | None:
-        """Return Transformers label names keyed by label id.
+    def _build_class_id_to_name(self) -> Mapping[int, str] | None:
+        """Build Transformers label names keyed by label id.
 
         :return: Label-name mapping or ``None``.
         """

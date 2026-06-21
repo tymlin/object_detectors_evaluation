@@ -44,9 +44,8 @@ class UltralyticsDetectionInferenceEngine(BaseDetectionInferenceEngine):
         filepath = self.resolve_model_filepath(filesuffixes=(".pt",))
         return YOLO(filepath)
 
-    @property
-    def class_id_to_name(self) -> Mapping[int, str] | None:
-        """Return Ultralytics label names keyed by label id.
+    def _build_class_id_to_name(self) -> Mapping[int, str] | None:
+        """Build Ultralytics label names keyed by label id.
 
         :return: Label-name mapping or ``None``.
         """

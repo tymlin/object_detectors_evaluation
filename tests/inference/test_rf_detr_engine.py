@@ -23,6 +23,8 @@ def _create_engine(
     engine.model = SimpleNamespace(config=SimpleNamespace(id2label=id2label))
     engine.model_artifact = SimpleNamespace(spec=SimpleNamespace(class_space="coco"))
     engine.max_detections = max_detections
+    engine._class_id_to_name = engine._build_class_id_to_name()
+    engine._class_name_to_id = {class_name: class_id for class_id, class_name in engine._class_id_to_name.items()}
     return engine
 
 

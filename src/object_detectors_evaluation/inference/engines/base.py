@@ -62,6 +62,12 @@ class BaseDetectionInferenceEngine(ABC):
             f"from path: '{model_artifact.dirpath}' with config: {self.config.model_dump_json(indent=4)}"
         )
         self.model = self.load_model()
+        self._class_id_to_name = self._build_class_id_to_name()
+        self._class_name_to_id = (
+            None
+            if self._class_id_to_name is None
+            else {class_name: class_id for class_id, class_name in self._class_id_to_name.items()}
+        )
         logger.info(
             f"Initialized inference engine `{self.engine_name}` with model `{model_artifact.spec.name}` "
             f"on device `{self.device}` with dtype `{self.dtype}`"
@@ -97,7 +103,7 @@ class BaseDetectionInferenceEngine(ABC):
 
         :return: Label-name mapping or ``None``.
         """
-        return None
+        return self._class_id_to_name
 
     @property
     def class_name_to_id(self) -> Mapping[str, int] | None:
@@ -105,11 +111,14 @@ class BaseDetectionInferenceEngine(ABC):
 
         :return: Class-name mapping or ``None``.
         """
-        class_id_to_name = self.class_id_to_name
-        if class_id_to_name is None:
-            return None
+        return self._class_name_to_id
 
-        return {class_name: class_id for class_id, class_name in class_id_to_name.items()}
+    def _build_class_id_to_name(self) -> Mapping[int, str] | None:
+        """Build engine-output class names after loading the model.
+
+        :return: Label-name mapping or ``None``.
+        """
+        return None
 
     @abstractmethod
     def load_model(self) -> Any:
