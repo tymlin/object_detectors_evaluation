@@ -66,6 +66,11 @@ LEADERBOARD_COLUMNS = (
     "throughput_images_per_second",
 )
 
+_VIRIDIS_COLORMAP = plt.get_cmap("viridis")
+_METRICS_COMPARISON_COLORS = tuple(_VIRIDIS_COLORMAP(position) for position in (0.15, 0.5, 0.85))
+_OBJECT_SIZE_MAP_COLORS = ("#9ECAE1", "#4292C6", "#08519C")
+_LATENCY_BREAKDOWN_COLORS = ("#6A00A8", "#CC4778", "#FCA636")
+
 
 def generate_detection_evaluation_report(
     run_dirpath: str | Path,
@@ -443,9 +448,9 @@ def _save_metrics_comparison(leaderboard: pd.DataFrame, filepath: Path) -> dict[
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(data))))
     bar_height = 0.24
     for offset, metric_name, label, color in (
-        (-bar_height, "map", "mAP", "#2563eb"),
-        (0.0, "map_50", "mAP50", "#16a34a"),
-        (bar_height, "map_75", "mAP75", "#dc2626"),
+        (-bar_height, "map", "mAP", _METRICS_COMPARISON_COLORS[0]),
+        (0.0, "map_50", "mAP50", _METRICS_COMPARISON_COLORS[1]),
+        (bar_height, "map_75", "mAP75", _METRICS_COMPARISON_COLORS[2]),
     ):
         axis.barh(positions + offset, data[metric_name], height=bar_height, label=label, color=color)
     axis.set_yticks(positions, labels=model_names)
@@ -465,9 +470,9 @@ def _save_object_size_map(leaderboard: pd.DataFrame, filepath: Path) -> dict[str
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(data))))
     bar_height = 0.24
     for offset, metric_name, label, color in (
-        (-bar_height, "map_small", "Small", "#7c3aed"),
-        (0.0, "map_medium", "Medium", "#0891b2"),
-        (bar_height, "map_large", "Large", "#ca8a04"),
+        (-bar_height, "map_small", "Small", _OBJECT_SIZE_MAP_COLORS[0]),
+        (0.0, "map_medium", "Medium", _OBJECT_SIZE_MAP_COLORS[1]),
+        (bar_height, "map_large", "Large", _OBJECT_SIZE_MAP_COLORS[2]),
     ):
         axis.barh(positions + offset, data[metric_name], height=bar_height, label=label, color=color)
     axis.set_yticks(positions, labels=model_names)
@@ -486,9 +491,9 @@ def _save_latency_breakdown(leaderboard: pd.DataFrame, filepath: Path) -> dict[s
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(data))))
     left = np.zeros(len(data), dtype=np.float64)
     for field_name, label, color in (
-        ("preprocess_mean_ms", "Preprocess", "#0891b2"),
-        ("inference_mean_ms", "Inference", "#2563eb"),
-        ("postprocess_mean_ms", "Postprocess", "#f59e0b"),
+        ("preprocess_mean_ms", "Preprocess", _LATENCY_BREAKDOWN_COLORS[0]),
+        ("inference_mean_ms", "Inference", _LATENCY_BREAKDOWN_COLORS[1]),
+        ("postprocess_mean_ms", "Postprocess", _LATENCY_BREAKDOWN_COLORS[2]),
     ):
         values = data[field_name].to_numpy(dtype=np.float64)
         axis.barh(model_names, values, left=left, label=label, color=color)
@@ -534,7 +539,16 @@ def _save_accuracy_latency(
 ) -> dict[str, str]:
     data = leaderboard.dropna(subset=["map", latency_field]).copy()
     fig, axis = plt.subplots(figsize=(12, 8))
-    axis.scatter(data[latency_field], data["map"], color="#2563eb", s=45)
+    scatter = axis.scatter(
+        data[latency_field],
+        data["map"],
+        c=data["map"],
+        cmap=_VIRIDIS_COLORMAP,
+        vmin=0,
+        vmax=1,
+        s=45,
+    )
+    fig.colorbar(scatter, ax=axis, label="mAP")
     for row in data.itertuples(index=False):
         axis.annotate(
             row.model,
@@ -546,8 +560,7 @@ def _save_accuracy_latency(
 
     pareto = _pareto_frontier(data=data, latency_field=latency_field)
     if not pareto.empty:
-        axis.plot(pareto[latency_field], pareto["map"], color="#dc2626", linewidth=1.5, label="Pareto frontier")
-        axis.scatter(pareto[latency_field], pareto["map"], color="#dc2626", s=55)
+        axis.plot(pareto[latency_field], pareto["map"], color="#CC4778", linewidth=1.5, label="Pareto frontier")
         axis.legend()
     axis.set_xlabel(f"{latency_field} (ms per inference call)")
     axis.set_ylabel("mAP")
