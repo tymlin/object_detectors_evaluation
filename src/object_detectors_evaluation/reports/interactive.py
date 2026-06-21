@@ -187,7 +187,7 @@ def _latency_breakdown_plot(leaderboard: pd.DataFrame) -> dict[str, str]:
             marker_color=color,
             hovertemplate=f"<b>%{{y}}</b><br>{label}: %{{x:.2f}} ms<extra></extra>",
         )
-    figure.update_layout(barmode="stack")
+    figure.update_layout(barmode="stack", legend_traceorder="normal")
     _style_figure(figure=figure, model_names=model_names, x_title="Mean latency (ms per inference call)")
     _add_model_sort_menu(
         figure=figure,

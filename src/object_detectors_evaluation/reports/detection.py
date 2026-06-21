@@ -485,6 +485,7 @@ def _save_metrics_comparison(leaderboard: pd.DataFrame, filepath: Path) -> dict[
     ):
         axis.barh(positions + offset, data[metric_name], height=bar_height, label=label, color=color)
     axis.set_yticks(positions, labels=model_names)
+    axis.set_ylim(-0.5, len(model_names) - 0.5)
     axis.set_xlim(0, 1)
     axis.set_xlabel("Average precision")
     axis.set_title("Detection accuracy by model")
@@ -507,6 +508,7 @@ def _save_object_size_map(leaderboard: pd.DataFrame, filepath: Path) -> dict[str
     ):
         axis.barh(positions + offset, data[metric_name], height=bar_height, label=label, color=color)
     axis.set_yticks(positions, labels=model_names)
+    axis.set_ylim(-0.5, len(model_names) - 0.5)
     axis.set_xlim(0, 1)
     axis.set_xlabel("Mean average precision")
     axis.set_title("Accuracy by object size")
@@ -529,6 +531,7 @@ def _save_latency_breakdown(leaderboard: pd.DataFrame, filepath: Path) -> dict[s
         values = data[field_name].to_numpy(dtype=np.float64)
         axis.barh(model_names, values, left=left, label=label, color=color)
         left += values
+    axis.set_ylim(-0.5, len(model_names) - 0.5)
     axis.set_xlabel("Mean latency (ms per inference call)")
     axis.set_title("Latency component breakdown")
     axis.grid(axis="x", alpha=0.25)
