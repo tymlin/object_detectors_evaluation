@@ -21,6 +21,7 @@ dependencies = [
     "pycocotools>=2.0.11",
     "pydantic>=2.13.4",
     "rich>=15.0.0",
+    "seaborn>=0.13.2",
     "torch>=2.12.0",
     "torchmetrics>=1.9.0",
     "torchvision>=0.27.0",

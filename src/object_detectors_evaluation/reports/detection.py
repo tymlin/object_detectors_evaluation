@@ -10,6 +10,8 @@ from shutil import rmtree
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from natsort import natsorted
 
@@ -524,7 +526,11 @@ def _save_latency_distribution(
         raise ValueError(msg)
 
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(model_names))))
-    axis.boxplot(values, vert=False, tick_labels=model_names, showfliers=False, patch_artist=True)
+    _draw_violin_distribution(
+        axis=axis,
+        model_names=model_names,
+        values=values,
+    )
     axis.set_xlabel("Total latency (ms per inference call)")
     axis.set_title("Raw latency distributions")
     axis.grid(axis="x", alpha=0.25)
@@ -644,9 +650,13 @@ def _save_prediction_counts(
     filepath: Path,
 ) -> dict[str, str]:
     model_names = list(prediction_stats)
-    values = [prediction_stats[name]["counts"] for name in model_names]
+    values = [[float(value) for value in prediction_stats[name]["counts"]] for name in model_names]
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(model_names))))
-    axis.boxplot(values, vert=False, tick_labels=model_names, showfliers=False, patch_artist=True)
+    _draw_violin_distribution(
+        axis=axis,
+        model_names=model_names,
+        values=values,
+    )
     axis.set_xlabel("Detections per image")
     axis.set_title("Prediction counts after report score filtering")
     axis.grid(axis="x", alpha=0.25)
@@ -687,6 +697,51 @@ def _save_figure(fig: Figure, filepath: Path) -> None:
     fig.tight_layout()
     fig.savefig(filepath, bbox_inches="tight")
     plt.close(fig)
+
+
+def _draw_violin_distribution(
+    axis: Axes,
+    model_names: list[str],
+    values: list[list[float]],
+) -> None:
+    palette = dict(zip(model_names, sns.husl_palette(n_colors=len(model_names)), strict=True))
+    records = []
+    fallback_values = []
+    for model_index, (model_name, model_values) in enumerate(zip(model_names, values, strict=True)):
+        values_array = np.asarray(model_values, dtype=np.float64)
+        if values_array.size >= 3 and np.unique(values_array).size >= 2:
+            records.extend({"model": model_name, "value": float(value)} for value in values_array)
+        else:
+            fallback_values.append((model_index, float(np.median(values_array))))
+
+    if records:
+        distribution = pd.DataFrame(records)
+        sns.violinplot(
+            data=distribution,
+            x="value",
+            y="model",
+            hue="model",
+            order=model_names,
+            orient="h",
+            palette=palette,
+            dodge=False,
+            legend=False,
+            inner="box",
+            cut=0,
+            density_norm="width",
+            common_norm=False,
+            bw_adjust=0.7,
+            linewidth=1,
+            ax=axis,
+        )
+    else:
+        axis.set_yticks(np.arange(len(model_names)), labels=model_names)
+
+    for model_index, median in fallback_values:
+        model_name = model_names[model_index]
+        axis.scatter(median, model_index, color=palette[model_name], edgecolor="black", linewidth=0.8, s=40, zorder=3)
+
+    axis.set_ylabel("")
 
 
 def _figure_height(num_items: int) -> float:
