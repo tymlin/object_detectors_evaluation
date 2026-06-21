@@ -161,6 +161,7 @@ def generate_detection_evaluation_report(
     if top_models is not None:
         leaderboard = leaderboard.head(top_models).copy()
     selected_model_names = leaderboard["model"].tolist()
+    naturally_sorted_model_names = natsorted(selected_model_names)
     metrics_by_model = {name: metrics_by_model[name] for name in selected_model_names}
     latency_records_by_model = {name: latency_records_by_model[name] for name in selected_model_names}
 
@@ -219,7 +220,7 @@ def generate_detection_evaluation_report(
         )
     )
     per_class_figure = _save_per_class_map(
-        model_names=selected_model_names,
+        model_names=naturally_sorted_model_names,
         metrics_by_model=metrics_by_model,
         class_map=class_map,
         target_counts=target_counts,
@@ -542,7 +543,8 @@ def _save_latency_distribution(
 ) -> dict[str, str]:
     model_names = []
     values = []
-    for model_name, latency_records in latency_records_by_model.items():
+    for model_name in natsorted(latency_records_by_model):
+        latency_records = latency_records_by_model[model_name]
         model_values = [float(record["total_ms"]) for record in latency_records]
         if model_values:
             model_names.append(model_name)
@@ -677,7 +679,7 @@ def _save_prediction_counts(
     prediction_stats: dict[str, dict[str, object]],
     filepath: Path,
 ) -> dict[str, str]:
-    model_names = list(prediction_stats)
+    model_names = natsorted(prediction_stats)
     values = [[float(value) for value in prediction_stats[name]["counts"]] for name in model_names]
     fig, axis = plt.subplots(figsize=(13, _figure_height(len(model_names))))
     _draw_violin_distribution(
@@ -697,7 +699,7 @@ def _save_confidence_distribution(
     score_threshold: float,
     filepath: Path,
 ) -> dict[str, str]:
-    model_names = list(prediction_stats)
+    model_names = natsorted(prediction_stats)
     matrix = []
     first_stats = prediction_stats[model_names[0]]
     edges = np.asarray(first_stats["histogram_edges"], dtype=np.float64)

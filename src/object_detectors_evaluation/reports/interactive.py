@@ -62,7 +62,7 @@ def build_detection_interactive_plots(
     :param latency_field: Latency value shown in the accuracy-latency chart.
     :return: Interactive plot metadata and HTML fragments.
     """
-    model_names = leaderboard["model"].tolist()
+    model_names = natsorted(leaderboard["model"].tolist())
     plots = [
         _metrics_comparison_plot(leaderboard=leaderboard),
         _object_size_plot(leaderboard=leaderboard),
@@ -189,6 +189,17 @@ def _latency_breakdown_plot(leaderboard: pd.DataFrame) -> dict[str, str]:
         )
     figure.update_layout(barmode="stack")
     _style_figure(figure=figure, model_names=model_names, x_title="Mean latency (ms per inference call)")
+    _add_model_sort_menu(
+        figure=figure,
+        leaderboard=leaderboard,
+        sort_fields=(
+            ("total_mean_ms", "Total latency"),
+            ("preprocess_mean_ms", "Preprocess latency"),
+            ("inference_mean_ms", "Inference latency"),
+            ("postprocess_mean_ms", "Postprocess latency"),
+            (None, "Model name"),
+        ),
+    )
     return _plot_record(
         plot_id="latency-breakdown",
         title="Latency breakdown",
@@ -325,7 +336,7 @@ def _per_class_plot(
 
 
 def _prediction_counts_plot(prediction_stats: dict[str, dict[str, object]]) -> dict[str, str]:
-    model_names = list(prediction_stats)
+    model_names = natsorted(prediction_stats)
     values_by_model = {
         model_name: [float(value) for value in prediction_stats[model_name]["counts"]] for model_name in model_names
     }
@@ -343,7 +354,7 @@ def _confidence_distribution_plot(
     prediction_stats: dict[str, dict[str, object]],
     score_threshold: float,
 ) -> dict[str, str]:
-    model_names = list(prediction_stats)
+    model_names = natsorted(prediction_stats)
     first_stats = prediction_stats[model_names[0]]
     edges = np.asarray(first_stats["histogram_edges"], dtype=np.float64)
     centers = (edges[:-1] + edges[1:]) / 2
@@ -460,6 +471,7 @@ def _add_model_sort_menu(
     sort_fields: tuple[tuple[str | None, str], ...],
 ) -> None:
     buttons = []
+    initial_categoryarray = []
     for field_name, label in sort_fields:
         if field_name is None:
             categoryarray = list(reversed(natsorted(leaderboard["model"].tolist())))
@@ -471,6 +483,8 @@ def _add_model_sort_menu(
                 kind="stable",
             )
             categoryarray = sorted_leaderboard["model"].tolist()
+        if not initial_categoryarray:
+            initial_categoryarray = categoryarray
         buttons.append(
             {
                 "label": f"Sort by: {label}",
@@ -499,6 +513,7 @@ def _add_model_sort_menu(
             }
         ],
     )
+    figure.update_yaxes(categoryorder="array", categoryarray=initial_categoryarray)
 
 
 def _plot_record(plot_id: str, title: str, description: str, figure: go.Figure) -> dict[str, str]:
