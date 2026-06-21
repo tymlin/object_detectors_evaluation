@@ -11,6 +11,7 @@ from PIL import Image
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.inference.predictions import DetectionPrediction
 from object_detectors_evaluation.inference.types import ImageInput
+from object_detectors_evaluation.visualization.style import configure_matplotlib
 from object_detectors_evaluation.visualization.types import Color, ColorKey, ColorMap
 
 
@@ -32,6 +33,7 @@ def plot_prediction(
     :param figsize: Matplotlib figure size.
     :return: Matplotlib figure.
     """
+    configure_matplotlib()
     image_array = _image_to_numpy(image=image)
     fig, axis = plt.subplots(1, 1, figsize=figsize)
     axis.imshow(image_array)
@@ -65,6 +67,7 @@ def plot_target_prediction(
     :param figsize: Matplotlib figure size.
     :return: Matplotlib figure.
     """
+    configure_matplotlib()
     image_array = _image_to_numpy(image=image)
     fig, axis = plt.subplots(1, 1, figsize=figsize)
     axis.imshow(image_array)

@@ -17,6 +17,7 @@ from torchvision.datasets.vision import VisionDataset
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
+from object_detectors_evaluation.visualization.style import configure_matplotlib
 
 
 def detection_collate_fn(batch: list[tuple[Any, DetectionTarget]]) -> tuple[list[Any], list[DetectionTarget]]:
@@ -202,6 +203,7 @@ class BaseDetectionDataset(VisionDataset):
         :param after_transforms: Whether to plot samples after applying dataset transforms.
         :return: Matplotlib figure containing the plotted samples.
         """
+        configure_matplotlib()
         n_images = len(idxs)
         fig, axes = plt.subplots(1, n_images, figsize=(5 * n_images, 5))
         if n_images == 1:

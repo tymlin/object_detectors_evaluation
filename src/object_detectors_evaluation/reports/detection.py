@@ -23,6 +23,7 @@ from object_detectors_evaluation.utils import (
     save_json,
     save_text,
 )
+from object_detectors_evaluation.visualization import configure_matplotlib
 
 METRIC_COLUMNS = (
     "map",
@@ -90,6 +91,7 @@ def generate_detection_evaluation_report(
     :param overwrite: Whether an existing report directory may be replaced.
     :return: Generated report HTML filepath.
     """
+    configure_matplotlib()
     _validate_report_arguments(
         score_threshold=score_threshold,
         top_classes=top_classes,
@@ -537,7 +539,7 @@ def _save_accuracy_latency(
         axis.annotate(
             row.model,
             (getattr(row, latency_field), row.map),
-            fontsize=7,
+            fontsize="x-small",
             xytext=(4, 4),
             textcoords="offset points",
         )
