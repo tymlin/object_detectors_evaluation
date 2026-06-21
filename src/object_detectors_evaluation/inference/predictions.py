@@ -32,10 +32,10 @@ class DetectionPrediction(BaseModel):
 
     boxes: np.ndarray = Field(description="Predicted boxes in `XYXY` pixel coordinates on the original image.")
     scores: np.ndarray = Field(description="Confidence scores aligned with `boxes`.")
-    labels: np.ndarray = Field(description="Model-native integer label ids aligned with `boxes`.")
+    labels: np.ndarray = Field(description="Engine-output integer class ids aligned with `boxes`.")
     labels_names: tuple[str, ...] | None = Field(
         default=None,
-        description="Optional model-native class names aligned with `labels`.",
+        description="Optional engine-output class names aligned with `labels`.",
     )
     image_id: int | str | None = Field(
         default=None,

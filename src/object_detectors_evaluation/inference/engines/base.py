@@ -93,7 +93,7 @@ class BaseDetectionInferenceEngine(ABC):
 
     @property
     def class_id_to_name(self) -> Mapping[int, str] | None:
-        """Return model-native label names keyed by model label id.
+        """Return engine-output class names keyed by class id.
 
         :return: Label-name mapping or ``None``.
         """
@@ -101,7 +101,7 @@ class BaseDetectionInferenceEngine(ABC):
 
     @property
     def class_name_to_id(self) -> Mapping[str, int] | None:
-        """Return model-native label ids keyed by model class name.
+        """Return engine-output class ids keyed by class name.
 
         :return: Class-name mapping or ``None``.
         """
@@ -221,9 +221,9 @@ class BaseDetectionInferenceEngine(ABC):
         return list(image_ids)
 
     def get_label_name(self, label: int) -> str:
-        """Return a model-native label name.
+        """Return an engine-output label name.
 
-        :param label: Model-native integer label id.
+        :param label: Engine-output integer label id.
         :return: Label name when known, otherwise the label id as a string.
         """
         class_id_to_name = self.class_id_to_name

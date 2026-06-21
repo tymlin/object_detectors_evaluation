@@ -90,7 +90,7 @@ class DetectionPredictionArtifact(BaseModel):
     box_format: DetectionBoxFormat = Field(description="Coordinate format used by `boxes`.")
     boxes: tuple[tuple[float, float, float, float], ...] = Field(description="Predicted boxes.")
     scores: tuple[float, ...] = Field(description="Prediction confidence scores.")
-    labels: tuple[int, ...] = Field(description="Model-native prediction labels.")
+    labels: tuple[int, ...] = Field(description="Engine-output prediction labels.")
     labels_names: tuple[str, ...] | None = Field(default=None, description="Optional prediction class names.")
     image_id: ImageId | None = Field(default=None, description="Optional dataset image identifier.")
     image_size: tuple[int, int] | None = Field(default=None, description="Optional image size as `(height, width)`.")

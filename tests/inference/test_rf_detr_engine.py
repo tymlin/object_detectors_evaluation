@@ -29,7 +29,6 @@ def _create_engine(
 def test_rf_detr_class_map_excludes_unused_slots_and_compacts_labels() -> None:
     engine = _create_engine()
 
-    assert engine.native_class_id_to_class_id == {1: 0, 2: 1, 4: 2}
     assert engine.class_id_to_name == {0: "person", 1: "bicycle", 2: "car"}
 
 
@@ -40,13 +39,12 @@ def test_rf_detr_class_map_matches_canonical_coco_labels() -> None:
     engine = _create_engine(id2label=id2label)
 
     assert len(engine.class_id_to_name) == 80
-    assert engine.native_class_id_to_class_id[1] == 0
-    assert engine.native_class_id_to_class_id[13] == 11
-    assert engine.native_class_id_to_class_id[62] == 56
-    assert engine.native_class_id_to_class_id[72] == 62
-    assert engine.native_class_id_to_class_id[86] == 75
-    assert engine.native_class_id_to_class_id[90] == 79
+    assert engine.class_id_to_name[0] == "person"
+    assert engine.class_id_to_name[11] == "stop sign"
+    assert engine.class_id_to_name[56] == "chair"
     assert engine.class_id_to_name[62] == "tv"
+    assert engine.class_id_to_name[75] == "vase"
+    assert engine.class_id_to_name[79] == "toothbrush"
 
 
 def test_rf_detr_prediction_filters_unused_slots_and_preserves_alignment() -> None:
