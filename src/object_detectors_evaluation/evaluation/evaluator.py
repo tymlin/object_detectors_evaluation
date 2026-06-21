@@ -185,6 +185,7 @@ class DetectionEvaluator:
         predictions_filepath = model_dirpath / "predictions.jsonl"
         latency_filepath = model_dirpath / "latency.jsonl"
         num_plotted_samples = 0
+        latest_map = "unknown"
 
         with create_progress(unit="samples", console_width=300, bar_width=50) as progress:
             task_id = progress.add_task(
@@ -244,7 +245,8 @@ class DetectionEvaluator:
                     running_metrics = metric.compute()
                     running_map = running_metrics.get("map")
                     if isinstance(running_map, int | float):
-                        progress_metrics["map"] = f"{running_map:.4f}"
+                        latest_map = f"{running_map:.4f}"
+                progress_metrics["map"] = latest_map
 
                 progress.update(
                     task_id,
