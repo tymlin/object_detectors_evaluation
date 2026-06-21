@@ -275,7 +275,7 @@ def _accuracy_latency_plot(leaderboard: pd.DataFrame, latency_field: LatencyFiel
         )
 
     latency_label = "Inference latency" if latency_field == "inference_mean_ms" else "Total pipeline latency"
-    _style_figure(figure=figure, x_title=f"{latency_label} (ms per inference call)", y_title="mAP", height=560)
+    _style_figure(figure=figure, x_title=f"{latency_label} (ms per inference call)", y_title="mAP", height=720)
     return _plot_record(
         plot_id="accuracy-latency",
         title="Accuracy versus latency",
