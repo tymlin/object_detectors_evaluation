@@ -11,7 +11,18 @@ from object_detectors_evaluation.consts import MODELS_DIRPATH, NOW, RUNS_DIRPATH
 from object_detectors_evaluation.datasets import BaseDetectionDataset, COCODataset, OpenImagesDataset
 from object_detectors_evaluation.datasets.fiftyone import download_dataset
 from object_detectors_evaluation.datasets.types import DetectionTarget
-from object_detectors_evaluation.evaluation.configs import DetectionEvaluatorConfig, DetectionEvaluatorModelConfig
+from object_detectors_evaluation.evaluation.artifacts import (
+    DetectionClassArtifact,
+    DetectionClassMapArtifact,
+    DetectionLatencyArtifact,
+    DetectionPredictionArtifact,
+    DetectionTargetArtifact,
+)
+from object_detectors_evaluation.evaluation.configs import (
+    DetectionEvaluatorConfig,
+    DetectionEvaluatorModelConfig,
+    DetectionEvaluatorResolvedConfig,
+)
 from object_detectors_evaluation.evaluation.metrics import DetectionMeanAveragePrecision, to_jsonable
 from object_detectors_evaluation.evaluation.results import (
     DetectionEvaluationLatencySummary,
@@ -106,7 +117,7 @@ class DetectionEvaluator:
 
         result = DetectionEvaluationRunResult(
             run_name=self.run_name,
-            run_dirpath=str(self.run_dirpath),
+            run_dirpath=self.run_dirpath,
             dataset_name=self.config.dataset.name,
             dataset_split=self.dataset_config.split,
             num_samples=num_samples,
@@ -284,7 +295,7 @@ class DetectionEvaluator:
             metrics=metrics,
             latency=latency_summary,
             num_samples=num_samples,
-            run_dirpath=str(model_dirpath),
+            run_dirpath=model_dirpath,
         )
         logger.info(f"Finished evaluating model `{model_spec.name}`")
         return result
@@ -406,11 +417,14 @@ class DetectionEvaluator:
     def _save_run_config(self) -> None:
         save_yaml(filepath=self.run_dirpath / "config.yaml", data=self.config.model_dump(mode="json"))
 
-        resolved_config = self.config.model_dump(mode="json")
-        resolved_config["run_name"] = self.run_name
-        resolved_config["run_dirpath"] = str(self.run_dirpath)
-        resolved_config["dataset"]["config"]["dataset_dirpath"] = str(self.dataset_config.dataset_dirpath)
-        save_json(filepath=self.run_dirpath / "resolved_config.json", data=resolved_config)
+        resolved_config_data = self.config.model_dump(mode="python")
+        resolved_config_data["run_name"] = self.run_name
+        resolved_config_data["run_dirpath"] = self.run_dirpath
+        resolved_config = DetectionEvaluatorResolvedConfig.model_validate(resolved_config_data)
+        save_json(
+            filepath=self.run_dirpath / "resolved_config.json",
+            data=resolved_config.model_dump(mode="json"),
+        )
 
     def _save_class_map(self, dataset: BaseDetectionDataset) -> None:
         class_ids = dataset.get_class_ids()
@@ -418,19 +432,19 @@ class DetectionEvaluator:
         source_class_ids = dataset.get_source_class_ids()
         classes = []
         for class_id, class_name, source_class_id in zip(class_ids, class_names, source_class_ids):
-            class_record = {
-                "label": class_id,
-                "name": class_name,
-                "source_id": to_jsonable(value=source_class_id),
-            }
+            class_record = DetectionClassArtifact(
+                label=class_id,
+                name=class_name,
+                source_id=to_jsonable(value=source_class_id),
+            )
             classes.append(class_record)
 
-        class_map = {
-            "dataset_name": self.config.dataset.name,
-            "class_space": self.config.dataset.name,
-            "classes": classes,
-        }
-        save_json(filepath=self.run_dirpath / "class_map.json", data=class_map)
+        class_map = DetectionClassMapArtifact(
+            dataset_name=self.config.dataset.name,
+            class_space=self.config.dataset.name,
+            classes=tuple(classes),
+        )
+        save_json(filepath=self.run_dirpath / "class_map.json", data=class_map.model_dump(mode="json"))
 
     def _append_targets(
         self,
@@ -440,12 +454,13 @@ class DetectionEvaluator:
     ) -> None:
         records = []
         for sample_index, target in zip(sample_indices, targets):
-            target_record = {
+            target_record_data = {
                 "sample_index": sample_index,
                 "box_format": "xyxy",
             }
-            target_record.update(to_jsonable(value=target))
-            records.append(target_record)
+            target_record_data.update(to_jsonable(value=target))
+            target_record = DetectionTargetArtifact.model_validate(target_record_data)
+            records.append(target_record.model_dump(mode="json"))
         append_jsonl(filepath=filepath, records=records)
 
     def _append_predictions(
@@ -456,12 +471,13 @@ class DetectionEvaluator:
     ) -> None:
         records = []
         for sample_index, prediction in zip(sample_indices, predictions):
-            prediction_record = {
+            prediction_record_data = {
                 "sample_index": sample_index,
                 "box_format": "xyxy",
             }
-            prediction_record.update(to_jsonable(value=prediction.model_dump(mode="python")))
-            records.append(prediction_record)
+            prediction_record_data.update(to_jsonable(value=prediction.model_dump(mode="python")))
+            prediction_record = DetectionPredictionArtifact.model_validate(prediction_record_data)
+            records.append(prediction_record.model_dump(mode="json"))
         append_jsonl(filepath=filepath, records=records)
 
     @staticmethod
@@ -472,17 +488,17 @@ class DetectionEvaluator:
         image_ids: list[ImageId],
         latency: DetectionLatency,
     ) -> None:
-        latency_record = {
-            "batch_index": batch_index,
-            "sample_indices": sample_indices,
-            "image_ids": image_ids,
-            "batch_size": len(sample_indices),
-            "preprocess_ms": latency.preprocess_ms,
-            "inference_ms": latency.inference_ms,
-            "postprocess_ms": latency.postprocess_ms,
-            "total_ms": latency.total_ms,
-        }
-        records = [to_jsonable(value=latency_record)]
+        latency_record = DetectionLatencyArtifact(
+            batch_index=batch_index,
+            sample_indices=tuple(sample_indices),
+            image_ids=tuple(image_ids),
+            batch_size=len(sample_indices),
+            preprocess_ms=latency.preprocess_ms,
+            inference_ms=latency.inference_ms,
+            postprocess_ms=latency.postprocess_ms,
+            total_ms=latency.total_ms,
+        )
+        records = [latency_record.model_dump(mode="json")]
         append_jsonl(
             filepath=filepath,
             records=records,

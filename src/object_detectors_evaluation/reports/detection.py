@@ -15,11 +15,27 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from natsort import natsorted
 
+from object_detectors_evaluation.evaluation.artifacts import (
+    DetectionClassMapArtifact,
+    DetectionLatencyArtifact,
+    DetectionPredictionArtifact,
+    DetectionTargetArtifact,
+)
+from object_detectors_evaluation.evaluation.configs import (
+    DetectionEvaluatorModelConfig,
+    DetectionEvaluatorResolvedConfig,
+)
+from object_detectors_evaluation.evaluation.results import (
+    DetectionEvaluationLatencySummary,
+    DetectionEvaluationModelResult,
+    DetectionEvaluationRunResult,
+)
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.reports.interactive import (
     build_detection_interactive_plots,
     save_plotly_javascript,
 )
+from object_detectors_evaluation.reports.models import DetectionReportConfig, DetectionReportData
 from object_detectors_evaluation.reports.types import LatencyField
 from object_detectors_evaluation.utils import (
     iter_jsonl,
@@ -114,13 +130,15 @@ def generate_detection_evaluation_report(
     _validate_output_dirpath(run_dirpath=run_dirpath, output_dirpath=output_dirpath)
 
     logger.info(f"Generating detection evaluation report from path: '{run_dirpath}'")
-    resolved_config = load_json(filepath=run_dirpath / "resolved_config.json")
-    summary = load_json(filepath=run_dirpath / "summary.json")
-    class_map = load_json(filepath=run_dirpath / "class_map.json")
+    resolved_config = DetectionEvaluatorResolvedConfig.model_validate(
+        load_json(filepath=run_dirpath / "resolved_config.json")
+    )
+    summary = DetectionEvaluationRunResult.model_validate(load_json(filepath=run_dirpath / "summary.json"))
+    class_map = DetectionClassMapArtifact.model_validate(load_json(filepath=run_dirpath / "class_map.json"))
     target_counts = _load_target_counts(filepath=run_dirpath / "targets.jsonl")
 
-    configured_models = {model_config["name"]: model_config for model_config in resolved_config.get("models", [])}
-    completed_models = {model_result["model_name"]: model_result for model_result in summary.get("models", [])}
+    configured_models = {model_config.name: model_config for model_config in resolved_config.models}
+    completed_models = {model_result.model_name: model_result for model_result in summary.models}
     missing_config_models = natsorted(set(completed_models) - set(configured_models))
     if missing_config_models:
         msg = f"Could not find resolved configuration for completed models: {missing_config_models}"
@@ -133,7 +151,7 @@ def generate_detection_evaluation_report(
     )
 
     metrics_by_model: dict[str, dict[str, object]] = {}
-    latency_records_by_model: dict[str, list[dict[str, object]]] = {}
+    latency_records_by_model: dict[str, list[DetectionLatencyArtifact]] = {}
     leaderboard_rows = []
     for model_name in selected_model_names:
         model_dirpath = require_dirpath(
@@ -141,8 +159,13 @@ def generate_detection_evaluation_report(
             description=f"model `{model_name}`",
         )
         metrics = load_json(filepath=model_dirpath / "metrics.json")
-        latency_summary = load_json(filepath=model_dirpath / "latency_summary.json")
-        latency_records = load_jsonl(filepath=model_dirpath / "latency.jsonl")
+        latency_summary = DetectionEvaluationLatencySummary.model_validate(
+            load_json(filepath=model_dirpath / "latency_summary.json")
+        )
+        latency_records = [
+            DetectionLatencyArtifact.model_validate(record)
+            for record in load_jsonl(filepath=model_dirpath / "latency.jsonl")
+        ]
         model_config = configured_models[model_name]
         model_result = completed_models[model_name]
         row = _build_leaderboard_row(
@@ -259,39 +282,45 @@ def generate_detection_evaluation_report(
         latency_field=latency_field,
     )
 
-    report_config = {
-        "run_dirpath": str(run_dirpath),
-        "output_dirpath": str(output_dirpath),
-        "score_threshold": score_threshold,
-        "top_classes": top_classes,
-        "model_names": selected_model_names,
-        "latency_field": latency_field,
-    }
-    save_json(filepath=output_dirpath / "report_config.json", data=report_config)
+    report_config = DetectionReportConfig(
+        run_dirpath=run_dirpath,
+        output_dirpath=output_dirpath,
+        score_threshold=score_threshold,
+        top_classes=top_classes,
+        model_names=tuple(selected_model_names),
+        latency_field=latency_field,
+    )
+    save_json(
+        filepath=output_dirpath / "report_config.json",
+        data=report_config.model_dump(mode="json"),
+    )
 
     leaderboard_records = json.loads(leaderboard.loc[:, LEADERBOARD_COLUMNS].to_json(orient="records"))
-    report_data = {
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
-        "run_name": summary.get("run_name"),
-        "dataset_name": summary.get("dataset_name"),
-        "dataset_split": summary.get("dataset_split"),
-        "num_samples": summary.get("num_samples"),
-        "num_models": len(selected_model_names),
-        "score_threshold": score_threshold,
-        "latency_field": latency_field,
-        "warnings": warnings,
-        "leaderboard": leaderboard_records,
-        "figures": figures,
-        "interactive_plots": [
+    report_data = DetectionReportData(
+        generated_at=datetime.now().replace(microsecond=0),
+        run_name=summary.run_name,
+        dataset_name=summary.dataset_name,
+        dataset_split=summary.dataset_split,
+        num_samples=summary.num_samples,
+        num_models=len(selected_model_names),
+        score_threshold=score_threshold,
+        latency_field=latency_field,
+        warnings=tuple(warnings),
+        leaderboard=tuple(leaderboard_records),
+        figures=tuple(figures),
+        interactive_plots=tuple(
             {
                 "id": plot["id"],
                 "title": plot["title"],
                 "description": plot["description"],
             }
             for plot in interactive_plots
-        ],
-    }
-    save_json(filepath=output_dirpath / "report_data.json", data=report_data)
+        ),
+    )
+    save_json(
+        filepath=output_dirpath / "report_data.json",
+        data=report_data.model_dump(mode="json"),
+    )
 
     html = _build_html(
         report_data=report_data,
@@ -378,19 +407,19 @@ def _select_model_names(
 
 def _build_leaderboard_row(
     model_name: str,
-    model_result: dict[str, object],
-    model_config: dict[str, object],
+    model_result: DetectionEvaluationModelResult,
+    model_config: DetectionEvaluatorModelConfig,
     metrics: dict[str, object],
-    latency_summary: dict[str, object],
+    latency_summary: DetectionEvaluationLatencySummary,
 ) -> dict[str, object]:
-    inference_config = model_config.get("config", {})
+    inference_config = model_config.config
     row = {
         "model": model_name,
-        "engine": model_result.get("engine_name"),
-        "device": inference_config.get("device"),
-        "dtype": inference_config.get("dtype"),
-        "score_threshold": inference_config.get("score_threshold"),
-        "max_detections": inference_config.get("max_detections"),
+        "engine": model_result.engine_name,
+        "device": inference_config.device,
+        "dtype": inference_config.dtype,
+        "score_threshold": inference_config.score_threshold,
+        "max_detections": inference_config.max_detections,
     }
     for metric_name in METRIC_COLUMNS:
         metric_value = metrics.get(metric_name)
@@ -398,7 +427,7 @@ def _build_leaderboard_row(
             metric_value = None
         row[metric_name] = metric_value
     for latency_name in LATENCY_COLUMNS:
-        row[latency_name] = latency_summary.get(latency_name)
+        row[latency_name] = getattr(latency_summary, latency_name)
     return row
 
 
@@ -438,8 +467,9 @@ def _load_prediction_stats(
 
         counts = []
         histogram = np.zeros(len(histogram_edges) - 1, dtype=np.int64)
-        for prediction in iter_jsonl(filepath=predictions_filepath):
-            scores = np.asarray(prediction.get("scores", []), dtype=np.float64)
+        for prediction_data in iter_jsonl(filepath=predictions_filepath):
+            prediction = DetectionPredictionArtifact.model_validate(prediction_data)
+            scores = np.asarray(prediction.scores, dtype=np.float64)
             scores = scores[scores >= score_threshold]
             counts.append(int(scores.size))
             batch_histogram, _ = np.histogram(scores, bins=histogram_edges)
@@ -461,8 +491,9 @@ def _load_prediction_stats(
 
 def _load_target_counts(filepath: Path) -> Counter[int]:
     target_counts: Counter[int] = Counter()
-    for target in iter_jsonl(filepath=filepath):
-        target_counts.update(int(label) for label in target.get("labels", []))
+    for target_data in iter_jsonl(filepath=filepath):
+        target = DetectionTargetArtifact.model_validate(target_data)
+        target_counts.update(target.labels)
     return target_counts
 
 
@@ -541,14 +572,14 @@ def _save_latency_breakdown(leaderboard: pd.DataFrame, filepath: Path) -> dict[s
 
 
 def _save_latency_distribution(
-    latency_records_by_model: dict[str, list[dict[str, object]]],
+    latency_records_by_model: dict[str, list[DetectionLatencyArtifact]],
     filepath: Path,
 ) -> dict[str, str]:
     model_names = []
     values = []
     for model_name in natsorted(latency_records_by_model):
         latency_records = latency_records_by_model[model_name]
-        model_values = [float(record["total_ms"]) for record in latency_records]
+        model_values = [record.total_ms for record in latency_records]
         if model_values:
             model_names.append(model_name)
             values.append(model_values)
@@ -625,14 +656,12 @@ def _pareto_frontier(data: pd.DataFrame, latency_field: LatencyField) -> pd.Data
 def _save_per_class_map(
     model_names: list[str],
     metrics_by_model: dict[str, dict[str, object]],
-    class_map: dict[str, object],
+    class_map: DetectionClassMapArtifact,
     target_counts: Counter[int],
     top_classes: int,
     filepath: Path,
 ) -> dict[str, str] | None:
-    class_name_by_label = {
-        int(class_record["label"]): str(class_record["name"]) for class_record in class_map.get("classes", [])
-    }
+    class_name_by_label = {class_record.label: class_record.name for class_record in class_map.classes}
     labels = [label for label, _ in target_counts.most_common(top_classes) if label in class_name_by_label]
     if not labels:
         return None
@@ -790,12 +819,11 @@ def _figure_record(title: str, filename: str, description: str) -> dict[str, str
 
 
 def _build_html(
-    report_data: dict[str, object],
+    report_data: DetectionReportData,
     leaderboard: pd.DataFrame,
     interactive_plots: list[dict[str, str]],
 ) -> str:
-    warnings = report_data["warnings"]
-    warning_html = "".join(f"<li>{escape(str(warning))}</li>" for warning in warnings)
+    warning_html = "".join(f"<li>{escape(warning)}</li>" for warning in report_data.warnings)
     if not warning_html:
         warning_html = "<li>No comparison warnings.</li>"
 
@@ -816,12 +844,12 @@ def _build_html(
         float_format=lambda value: f"{value:.4f}",
         table_id="leaderboard",
     )
-    run_name = escape(str(report_data.get("run_name")))
-    dataset = escape(f"{report_data.get('dataset_name')} / {report_data.get('dataset_split')}")
-    generated_at = escape(str(report_data.get("generated_at")))
-    num_samples = escape(str(report_data.get("num_samples")))
-    num_models = escape(str(report_data.get("num_models")))
-    score_threshold = escape(str(report_data.get("score_threshold")))
+    run_name = escape(report_data.run_name)
+    dataset = escape(f"{report_data.dataset_name} / {report_data.dataset_split}")
+    generated_at = escape(report_data.generated_at.isoformat(timespec="seconds"))
+    num_samples = escape(str(report_data.num_samples))
+    num_models = escape(str(report_data.num_models))
+    score_threshold = escape(str(report_data.score_threshold))
     return f"""<!doctype html>
 <html lang="en">
 <head>

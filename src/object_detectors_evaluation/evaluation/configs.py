@@ -190,3 +190,14 @@ class DetectionEvaluatorConfig(BaseModel):
         # ``defaults`` is a YAML-only section used for anchors and aliases, not part of the runtime schema.
         data.pop("defaults", None)
         return cls.model_validate(data)
+
+
+class DetectionEvaluatorResolvedConfig(DetectionEvaluatorConfig):
+    """Evaluator configuration with runtime-resolved run metadata.
+
+    :param run_name: Timestamped evaluator run name.
+    :param run_dirpath: Evaluator run output directory.
+    """
+
+    run_name: str = Field(min_length=1, description="Timestamped evaluator run name.")
+    run_dirpath: Path = Field(description="Evaluator run output directory.")

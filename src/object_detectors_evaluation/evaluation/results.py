@@ -1,6 +1,9 @@
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from object_detectors_evaluation.datasets.types import DatasetName, DatasetSplit
 
 
 class DetectionEvaluationLatencySummary(BaseModel):
@@ -34,7 +37,7 @@ class DetectionEvaluationModelResult(BaseModel):
     metrics: dict[str, Any] = Field(description="JSON-serializable metric output.")
     latency: DetectionEvaluationLatencySummary = Field(description="Aggregated model latency.")
     num_samples: int = Field(ge=0, description="Number of evaluated dataset samples.")
-    run_dirpath: str = Field(description="Model run output directory.")
+    run_dirpath: Path = Field(description="Model run output directory.")
 
 
 class DetectionEvaluationRunResult(BaseModel):
@@ -43,8 +46,8 @@ class DetectionEvaluationRunResult(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     run_name: str = Field(description="Resolved run name.")
-    run_dirpath: str = Field(description="Run output directory.")
-    dataset_name: str = Field(description="Evaluated dataset name.")
-    dataset_split: str = Field(description="Evaluated dataset split.")
+    run_dirpath: Path = Field(description="Run output directory.")
+    dataset_name: DatasetName = Field(description="Evaluated dataset name.")
+    dataset_split: DatasetSplit = Field(description="Evaluated dataset split.")
     num_samples: int = Field(ge=0, description="Number of evaluated dataset samples.")
     models: tuple[DetectionEvaluationModelResult, ...] = Field(description="Per-model evaluation results.")

@@ -11,6 +11,7 @@ from plotly import graph_objects as go
 from plotly.io import to_html
 from plotly.offline import get_plotlyjs
 
+from object_detectors_evaluation.evaluation.artifacts import DetectionClassMapArtifact, DetectionLatencyArtifact
 from object_detectors_evaluation.reports.types import LatencyField
 from object_detectors_evaluation.utils import save_text
 
@@ -40,9 +41,9 @@ def save_plotly_javascript(filepath: Path) -> None:
 
 def build_detection_interactive_plots(
     leaderboard: pd.DataFrame,
-    latency_records_by_model: dict[str, list[dict[str, object]]],
+    latency_records_by_model: dict[str, list[DetectionLatencyArtifact]],
     metrics_by_model: dict[str, dict[str, object]],
-    class_map: dict[str, object],
+    class_map: DetectionClassMapArtifact,
     target_counts: Counter[int],
     prediction_stats: dict[str, dict[str, object]],
     score_threshold: float,
@@ -210,11 +211,10 @@ def _latency_breakdown_plot(leaderboard: pd.DataFrame) -> dict[str, str]:
 
 def _latency_distribution_plot(
     model_names: list[str],
-    latency_records_by_model: dict[str, list[dict[str, object]]],
+    latency_records_by_model: dict[str, list[DetectionLatencyArtifact]],
 ) -> dict[str, str]:
     values_by_model = {
-        model_name: [float(record["total_ms"]) for record in latency_records_by_model[model_name]]
-        for model_name in model_names
+        model_name: [record.total_ms for record in latency_records_by_model[model_name]] for model_name in model_names
     }
     distribution_model_names = [model_name for model_name in model_names if values_by_model[model_name]]
     figure = _distribution_figure(model_names=distribution_model_names, values_by_model=values_by_model)
@@ -287,13 +287,11 @@ def _accuracy_latency_plot(leaderboard: pd.DataFrame, latency_field: LatencyFiel
 def _per_class_plot(
     model_names: list[str],
     metrics_by_model: dict[str, dict[str, object]],
-    class_map: dict[str, object],
+    class_map: DetectionClassMapArtifact,
     target_counts: Counter[int],
     top_classes: int,
 ) -> dict[str, str] | None:
-    class_name_by_label = {
-        int(class_record["label"]): str(class_record["name"]) for class_record in class_map.get("classes", [])
-    }
+    class_name_by_label = {class_record.label: class_record.name for class_record in class_map.classes}
     labels = [label for label, _ in target_counts.most_common(top_classes) if label in class_name_by_label]
     if not labels:
         return None
