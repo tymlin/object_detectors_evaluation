@@ -16,6 +16,10 @@ from matplotlib.figure import Figure
 from natsort import natsorted
 
 from object_detectors_evaluation.loggers import logger
+from object_detectors_evaluation.reports.interactive import (
+    build_detection_interactive_plots,
+    save_plotly_javascript,
+)
 from object_detectors_evaluation.reports.types import LatencyField
 from object_detectors_evaluation.utils import (
     iter_jsonl,
@@ -85,7 +89,7 @@ def generate_detection_evaluation_report(
     latency_field: LatencyField = "inference_mean_ms",
     overwrite: bool = False,
 ) -> Path:
-    """Generate a static HTML and PNG report for one completed detection evaluation run.
+    """Generate an offline interactive HTML report and static PNG artifacts for one completed evaluation run.
 
     :param run_dirpath: Completed detection evaluation run directory.
     :param output_dirpath: Optional output directory. Defaults to ``<run>/report``.
@@ -174,6 +178,9 @@ def generate_detection_evaluation_report(
     _prepare_output_dirpath(output_dirpath=output_dirpath, overwrite=overwrite)
     figures_dirpath = output_dirpath / "figures"
     figures_dirpath.mkdir()
+    assets_dirpath = output_dirpath / "assets"
+    assets_dirpath.mkdir()
+    save_plotly_javascript(filepath=assets_dirpath / "plotly.min.js")
 
     leaderboard_filepath = output_dirpath / "leaderboard.csv"
     logger.info(f"Saving report leaderboard to path: '{leaderboard_filepath}'")
@@ -239,6 +246,18 @@ def generate_detection_evaluation_report(
             )
         )
 
+    interactive_plots = build_detection_interactive_plots(
+        leaderboard=leaderboard,
+        latency_records_by_model=latency_records_by_model,
+        metrics_by_model=metrics_by_model,
+        class_map=class_map,
+        target_counts=target_counts,
+        prediction_stats=prediction_stats,
+        score_threshold=score_threshold,
+        top_classes=top_classes,
+        latency_field=latency_field,
+    )
+
     report_config = {
         "run_dirpath": str(run_dirpath),
         "output_dirpath": str(output_dirpath),
@@ -262,12 +281,21 @@ def generate_detection_evaluation_report(
         "warnings": warnings,
         "leaderboard": leaderboard_records,
         "figures": figures,
+        "interactive_plots": [
+            {
+                "id": plot["id"],
+                "title": plot["title"],
+                "description": plot["description"],
+            }
+            for plot in interactive_plots
+        ],
     }
     save_json(filepath=output_dirpath / "report_data.json", data=report_data)
 
     html = _build_html(
         report_data=report_data,
         leaderboard=leaderboard.loc[:, LEADERBOARD_COLUMNS],
+        interactive_plots=interactive_plots,
     )
     report_filepath = output_dirpath / "index.html"
     save_text(filepath=report_filepath, text=html)
@@ -756,22 +784,25 @@ def _figure_record(title: str, filename: str, description: str) -> dict[str, str
     }
 
 
-def _build_html(report_data: dict[str, object], leaderboard: pd.DataFrame) -> str:
+def _build_html(
+    report_data: dict[str, object],
+    leaderboard: pd.DataFrame,
+    interactive_plots: list[dict[str, str]],
+) -> str:
     warnings = report_data["warnings"]
     warning_html = "".join(f"<li>{escape(str(warning))}</li>" for warning in warnings)
     if not warning_html:
         warning_html = "<li>No comparison warnings.</li>"
 
-    figures_html = "".join(
+    plots_html = "".join(
         (
             "<section>"
-            f"<h2>{escape(figure['title'])}</h2>"
-            f"<p>{escape(figure['description'])}</p>"
-            f"<a href=\"{escape(figure['filename'])}\">"
-            f"<img src=\"{escape(figure['filename'])}\" alt=\"{escape(figure['title'])}\"></a>"
+            f"<h2>{escape(plot['title'])}</h2>"
+            f"<p>{escape(plot['description'])}</p>"
+            f"{plot['html']}"
             "</section>"
         )
-        for figure in report_data["figures"]
+        for plot in interactive_plots
     )
     leaderboard_html = leaderboard.to_html(
         index=False,
@@ -792,6 +823,7 @@ def _build_html(report_data: dict[str, object], leaderboard: pd.DataFrame) -> st
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Detection evaluation report - {run_name}</title>
+    <script src="assets/plotly.min.js"></script>
     <style>
         body {{ margin: 0; color: #17202a; background: #f5f7fa; font-family: Arial, sans-serif; }}
         main {{ max-width: 1500px; margin: 0 auto; padding: 24px; }}
@@ -799,7 +831,7 @@ def _build_html(report_data: dict[str, object], leaderboard: pd.DataFrame) -> st
         h1, h2 {{ letter-spacing: 0; }}
         .meta {{ display: flex; flex-wrap: wrap; gap: 24px; color: #4b5563; }}
         section {{ margin: 28px 0; padding: 20px; background: white; border: 1px solid #d9dee7; border-radius: 6px; }}
-        img {{ display: block; width: 100%; height: auto; }}
+        .plotly-graph-div {{ width: 100%; }}
         .table-wrap {{ overflow-x: auto; }}
         table {{ width: 100%; border-collapse: collapse; font-size: 13px; }}
         th {{ position: sticky; top: 0; cursor: pointer; background: #e8edf4; }}
@@ -835,7 +867,7 @@ def _build_html(report_data: dict[str, object], leaderboard: pd.DataFrame) -> st
         <p><a href="leaderboard.csv">Download leaderboard.csv</a> |
            <a href="report_data.json">Open report_data.json</a></p>
     </section>
-    {figures_html}
+    {plots_html}
 </main>
 <script>
 document.querySelectorAll('#leaderboard th').forEach((header, column) => {{

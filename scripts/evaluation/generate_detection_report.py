@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
     :return: Parsed command-line arguments.
     """
     parser = argparse.ArgumentParser(
-        description="Generate a static report for a completed detection evaluation run.",
+        description="Generate an offline interactive report for a completed detection evaluation run.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
