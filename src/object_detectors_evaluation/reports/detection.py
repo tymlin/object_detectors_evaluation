@@ -672,7 +672,7 @@ def _save_confidence_distribution(
 def _save_figure(fig: Figure, filepath: Path) -> None:
     logger.info(f"Saving report figure to path: '{filepath}'")
     fig.tight_layout()
-    fig.savefig(filepath, dpi=160, bbox_inches="tight")
+    fig.savefig(filepath, bbox_inches="tight")
     plt.close(fig)
 
 
