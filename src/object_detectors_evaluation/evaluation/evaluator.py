@@ -264,7 +264,7 @@ class DetectionEvaluator:
                     advance=len(targets),
                     metrics=progress_metrics,
                 )
-
+        logger.info(f"Starting computing metrics for model `{model_spec.name}`")
         metrics = metric.compute()
         latency_summary = self._summarize_latencies(latencies=latencies, num_images=num_latency_images)
         logger.info(
