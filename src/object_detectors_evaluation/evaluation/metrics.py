@@ -46,6 +46,10 @@ class DetectionMeanAveragePrecision:
         metrics_json = to_jsonable(value=metrics)
         return metrics_json
 
+    def reset(self) -> None:
+        """Reset accumulated metric state."""
+        self.metric.reset()
+
     @staticmethod
     def _prediction_to_torchmetrics(prediction: DetectionPrediction) -> dict[str, torch.Tensor]:
         return {

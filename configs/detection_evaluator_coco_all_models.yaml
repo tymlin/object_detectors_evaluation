@@ -15,7 +15,7 @@ evaluation:
     batch_size: 1
     num_samples: null
     warmup_iterations: 10
-    map_progress_update_interval: 100
+    window_map_sample_count: 100
     metrics:
         backend: pycocotools
         extended_summary: false

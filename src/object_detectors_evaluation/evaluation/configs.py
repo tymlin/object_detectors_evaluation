@@ -115,7 +115,7 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
     :param batch_size: Number of dataset samples to evaluate per engine call.
     :param num_samples: Optional number of dataset samples to evaluate. ``None`` means all samples.
     :param warmup_iterations: Number of warmup engine calls before measuring a model.
-    :param map_progress_update_interval: Optional number of batches between running mAP progress updates.
+    :param window_map_sample_count: Optional number of samples per progress-only window mAP chunk.
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -135,10 +135,10 @@ class DetectionEvaluatorRuntimeConfig(BaseModel):
         ge=0,
         description="Number of warmup engine calls before measuring a model.",
     )
-    map_progress_update_interval: int | None = Field(
+    window_map_sample_count: int | None = Field(
         default=100,
         ge=1,
-        description="Optional number of batches between running mAP progress updates. `None` disables them.",
+        description="Optional number of samples per progress-only window mAP chunk. `None` disables it.",
     )
     metrics: DetectionEvaluatorMetricsConfig = Field(
         default_factory=DetectionEvaluatorMetricsConfig,

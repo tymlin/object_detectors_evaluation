@@ -189,14 +189,18 @@ class DetectionEvaluator:
         logger.info(f"Finished warmup for model `{model_spec.name}`")
 
         metric = DetectionMeanAveragePrecision(config=self.config.evaluation.metrics)
-        map_progress_update_interval = self.config.evaluation.map_progress_update_interval
+        window_map_sample_count = self.config.evaluation.window_map_sample_count
+        window_map_metric = None
+        if window_map_sample_count is not None:
+            window_map_metric = DetectionMeanAveragePrecision(config=self.config.evaluation.metrics)
+        window_map_num_samples = 0
         latencies = []
         num_latency_images = 0
         targets_filepath = self.run_dirpath / "targets.jsonl"
         predictions_filepath = model_dirpath / "predictions.jsonl"
         latency_filepath = model_dirpath / "latency.jsonl"
         num_plotted_samples = 0
-        latest_map = "unknown"
+        latest_window_map = "unknown"
 
         with create_progress(unit="samples", console_width=300, bar_width=50) as progress:
             task_id = progress.add_task(
@@ -217,6 +221,17 @@ class DetectionEvaluator:
                 prediction_batch = engine(images=prepared_images, image_ids=image_ids)
                 predictions = list(prediction_batch.predictions)
                 metric.update(predictions=predictions, targets=targets)
+                if window_map_metric is not None and window_map_sample_count is not None:
+                    for prediction, target in zip(predictions, targets):
+                        window_map_metric.update(predictions=[prediction], targets=[target])
+                        window_map_num_samples += 1
+                        if window_map_num_samples == window_map_sample_count:
+                            window_map_metrics = window_map_metric.compute()
+                            window_map = window_map_metrics.get("map")
+                            if isinstance(window_map, int | float):
+                                latest_window_map = f"{window_map:.4f}"
+                            window_map_metric.reset()
+                            window_map_num_samples = 0
                 if prediction_batch.latency is not None:
                     latencies.append(prediction_batch.latency)
                     num_latency_images += len(targets)
@@ -248,16 +263,14 @@ class DetectionEvaluator:
                 if prediction_batch.latency is not None:
                     progress_metrics["latency_ms"] = f"{prediction_batch.latency.total_ms:.2f}"
                 completed_samples = progress.tasks[task_id].completed + len(targets)
-                is_map_update_batch = (
-                    map_progress_update_interval is not None and (batch_index + 1) % map_progress_update_interval == 0
-                )
                 is_last_batch = completed_samples >= num_samples
-                if is_map_update_batch or is_last_batch:
-                    running_metrics = metric.compute()
-                    running_map = running_metrics.get("map")
-                    if isinstance(running_map, int | float):
-                        latest_map = f"{running_map:.4f}"
-                progress_metrics["map"] = latest_map
+                if window_map_metric is not None and is_last_batch and window_map_num_samples > 0:
+                    window_map_metrics = window_map_metric.compute()
+                    window_map = window_map_metrics.get("map")
+                    if isinstance(window_map, int | float):
+                        latest_window_map = f"{window_map:.4f}"
+                if window_map_sample_count is not None:
+                    progress_metrics["window_map"] = latest_window_map
 
                 progress.update(
                     task_id,
