@@ -24,8 +24,8 @@ evaluation:
 outputs:
     save_predictions: true
     save_plots: true
-    num_plot_samples: null
-    plot_score_threshold: null
+    num_plot_samples: 10
+    plot_score_threshold: 0.25
 
 defaults:
     model: &model_defaults
