@@ -5,7 +5,7 @@ from pathlib import Path
 
 from loguru import logger as _logger
 
-from ..consts import LOGGER_FILENAME, LOGGER_FORMAT, LOGGER_LEVEL, RUNS_DIRPATH
+from object_detectors_evaluation.consts import LOGGER_FILENAME, LOGGER_FORMAT, LOGGER_LEVEL, RUNS_DIRPATH
 
 logger = _logger
 

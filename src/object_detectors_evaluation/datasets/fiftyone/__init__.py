@@ -1,6 +1,5 @@
 from object_detectors_evaluation.consts import FIFTYONE_DATASETS_DIRPATH
-
-from .downloaders import (
+from object_detectors_evaluation.datasets.fiftyone.downloaders import (
     COCO_2017_DATASET_NAME,
     OPEN_IMAGES_V7_DATASET_NAME,
     configure_fiftyone_dataset_dir,

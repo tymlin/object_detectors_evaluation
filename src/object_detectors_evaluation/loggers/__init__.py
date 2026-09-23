@@ -1,2 +1,2 @@
-from .helpers import log_breaking_point
-from .loguru import configure_logger, get_log_filepath, logger
+from object_detectors_evaluation.loggers.helpers import log_breaking_point
+from object_detectors_evaluation.loggers.loguru import configure_logger, get_log_filepath, logger

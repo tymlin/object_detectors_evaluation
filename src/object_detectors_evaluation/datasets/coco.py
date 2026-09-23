@@ -7,15 +7,14 @@ from typing import Any, Callable
 import numpy as np
 from PIL import Image
 
+from object_detectors_evaluation.datasets.base import (
+    BaseDetectionDataset,
+    DetectionClassMap,
+)
 from object_detectors_evaluation.datasets.configs import DetectionDatasetConfig
 from object_detectors_evaluation.datasets.types import DetectionTarget
 from object_detectors_evaluation.loggers import logger
 from object_detectors_evaluation.utils.files import load_json, require_dirpath, require_filepath
-
-from .base import (
-    BaseDetectionDataset,
-    DetectionClassMap,
-)
 
 
 class COCODataset(BaseDetectionDataset):

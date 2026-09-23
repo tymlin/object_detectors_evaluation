@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .loguru import logger
+from object_detectors_evaluation.loggers.loguru import logger
 
 
 def log_breaking_point(
